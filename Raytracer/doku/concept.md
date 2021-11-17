@@ -28,3 +28,13 @@
 ### Reflection and Refraction (Ch.4):
 - useful for glass and mirror surfaces
 - depend on the direction of the ray and on the normal-vector at the intersect point
+- Material also needs a refraction index
+- Many materials refract and reflect at the same time
+    - both need to be computet
+    - ![](https://www.scratchapixel.com/images/upload/introduction-to-ray-tracing/reflectionrefraction.gif)
+    - Values are mixed using the Fresnel equation
+
+
+**Computation of Color-Values can be done recursive to add refraction and reflection**
+
+- 
