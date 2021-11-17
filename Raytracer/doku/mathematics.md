@@ -1,0 +1,56 @@
+**Website: [Scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry](https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry)**
+
+# Geometry
+- Homogenous Points: 3 dimensional Points with a 4th dimension added for mathematical simplicity 
+    - `P_H = (x,y,z,w)`
+- Normalised Vector: length = 1
+- Left- vs. Right-Handed **Coordinate Systems**: ![](https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/coordinate-systems)
+
+## Vectors
+- Length: 
+$$
+||V|| = \sqrt{V.x^2 + V.y^2 + V.z^2}
+$$
+
+- Normalized Vector
+$$
+V_n = \frac{V}{||V||}
+$$
+
+- Dot Product (also <A,B>)
+$$
+A * B = A.x * B.x + A.y * B.y + A.z * B.z
+$$
+![](https://www.scratchapixel.com/images/upload/geometry/dotproduct.png?)
+$$
+\Theta = \arccos(A_n * B_n)
+$$
+
+- Cross Product:
+    - $ C \perp  A , C \perp B $
+    - $ A \times B = C, B \times A = -C $
+$$
+C = A \times B = \begin{pmatrix}
+A_Y * B_Z - A_Z * B_Y \\
+A_Z * B_X - A_X * B_Z \\
+A_X * B_Y - A_Y * B_X
+\end{pmatrix}
+$$
+![](https://www.scratchapixel.com/images/upload/geometry/crossproduct.png?)
+
+## Matrices:
+- Multiplication:
+    - ![](data:image/png;base64,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)
+
+- Rotation Matrix
+    - Matrices to rotate a Vector/Point around the respective axes:
+        - $ R_x(\theta)= \begin{bmatrix} 1 & 0 & 0 \\ 0 & \cos(\theta) & \sin(\theta) \\ 0 & -\sin(\theta) & \cos(\theta) \\ \end{bmatrix} $
+        - $ R_y(\theta)= \begin{bmatrix} \cos(\theta) & 0 & -\sin(\theta) \\ 0 & 1 &  0 \\ \sin(\theta) & 0 & \cos(\theta) \\ \end{bmatrix} $
+        - $ R_z(\theta)= \begin{bmatrix} \cos(\theta) & \sin(\theta) & 0 \\ -\sin(\theta) & \cos(\theta) & 0 \\ 0 & 0 & 1 \\ \end{bmatrix} $
+    - Combination: $ R_{XY} = R_X * R_Y $
+
+- Orthogonal Matrix
+    - $ Q^T = Q^{-1}, QQ^T = I $
+
+### Transformations:
+- Affine Transformations: Preserve Para
