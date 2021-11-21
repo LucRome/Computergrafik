@@ -95,10 +95,103 @@ $$
 - We are now able to compute the primary rays
 - **Column Major Matrices are used**
 
-
-
 # Creating a simple Ray Tracer
 - [scratchapixel.com](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes)
+
+## Parametric and implicit surfaces
+### Parametric surfaces
+- Parametric Rays: $P=O+tD$
+    - ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/impsurf-ray.png?)
+- Spheres:
+    - $\begin{array}{ll} P.x=\cos(\theta)\sin(\phi) \\ P.y = \cos(\theta) \\ P.z = \sin(\theta)\sin(\phi)\end{array}$
+    - or: $\vec{r}(\theta, \phi) = (\cos(\theta)\sin(\phi), \cos(\theta), \sin(\theta)\sin(\phi)$
+    - $0 \leq \theta \leq 2\pi, 0 \leq \phi \leq \pi$
+    - ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/impsurf-sphere.png?)
+    - equations may differ depending on used definitions
+
+### Implicit Surfaces
+- Sphere: $x^2 + y^2 + z^2 = r^2$
+    - although spheres are not really useful for complex shapes, they can be used to test whether a ray intersects with the closer geometry of a complex geometry (bounding volume, saves power)
+
+### Uses
+- implicit: check whether ray intersects with object
+- parametric: to compute texture coordinates and so on
+
+### Other infos
+- the sphere belongs to a category of objects called quadrics (cones, torus, ...)
+    - for all quadrics the same solution can be used to test whether they intersect with a ray
+- production quality Renderers normally only support one type of object e.g. triangles (other objects are transformed into them)
+
+## Ray-Sphere Intersection
+- Two Solutions:
+    - Geometric
+    - Analytic (can be ported more easily)
+### Geometric
+- Ray: $\vec{O} + t\vec{D}$
+- ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/raysphereisect1.png?)
+- $\begin{array}{ll}P=O+t_0D \\ P'=O+t_1D \\ \end{array}$
+- Algorithm:
+    1. Compute $t_{ca}$:
+        - $\begin{array}{ll} \vec{L}=\vec{C}-\vec{O} \\ \vec{t_{ca}}=\vec{L} \cdot \vec{D} \\ if (t_{ca} < 0) \ return \ false \end{array}$
+    2. Compute $d$:
+        - $\begin{array}{ll} d = \sqrt{L\cdot L - t_{ca} \cdot t_{ca}} \\ if(d<0\ or\ d>radius)\ return\ false \end{array}$
+    3. Compute $t_{hc}$ and $t_0, t_1$:
+        - $\begin{array}{ll} t_{hc}=\sqrt{radius^2-d^2} \\ t_0=t_{ca}-t_{hc} \\ t_1=t_{ca}+t_{hc} \end{array}$      
+### Analytic Solution
+- Sphere can be expressed as $x^2+y^2+z^2=R^2$
+    - with $x^2+y^2+z^2=P^2 \rightarrow P^2-R^2 = 0$
+    - Point $P$ represents a Point on the surface of the sphere
+    - To get the intersect Points the equations for the sphere and the ray must be substituted
+    - $\begin{array}{ll} & |O+tD|^2-R^2=0  \\ \rightarrow & O^2+(Dt)^2+2ODt-R^2 \ \widehat{=} \ f(x)=ax^2+bx+c \\ \end{array}$
+    - $\boxed{\begin{array}{ll} x = \frac{-b \pm \sqrt{b^2-4ac}}{2a} \\ \Delta = b^2 - 4ac \\ a=D^2, \ b=2OD, \ c=O^2-R^2 \end{array}}$ (Equation 5)
+    - $\Delta$ (Discriminant) determines amount of solutions (intersect points):
+      - $\Delta > 0$:
+        - $x_1=\frac{-b+\sqrt{\Delta}}{2a}\ and\ x_2=\frac{-b-\sqrt{\Delta}}{2a}$
+      - $\Delta = 0$:
+        - $x=-\frac{b}{2a}$
+      - $\Delta < 0$:
+        - No solution $\rightarrow$ No intersect Point
+
+- For a Sphere thats not centered at the Origin:
+  - New Sphere Equation: $|P-C|^2 - R^2 = 0,\ C: Offset$
+  - $\rightarrow \ |O+tD-C|^2-R^2=0$
+  - **new a,b,c:**
+    - $\boxed{\begin{array}{ll} a=D^2 \ (1\ when\ normalised) \\ b=2D(O-C) \\ c=|O-C|^2-R^2 \end{array}}$
+
+- Improvements for Computers:
+  - Equation 5 is not suitable, since computers have limited accuracy -> may lead to errors
+  - Instead: $\boxed{\begin{array}{ll} q=-\frac{1}{2}(b+sign(b)\sqrt{b^2-4ac}) \\ x_1=\frac{q}{a} \\ x_2=\frac{c}{q} \end{array}}$
+    - $\boxed{sign(x) = \left\{\begin{array}{ll} -1 & for & b<0 \\ 1 & otherwise\end{array}\right.}$
+  - When there are multiple objects one needs to keep track of the closest object
+### Compute Intersect Point:
+- $t_0$: Parameter t for the visible intersect Point
+  - $P_{hit}=O+t_0D$
+- Different Possibilities for Intersect Points:
+  - ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/rayspherecases.png?)
+
+### Computing the Normal at Intersection Point
+- ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/impsurf-normal.png?)
+- $N=||P_{hit}-C||$ (||a||: Vector a normalised)
+
+### Computing Texture Coordinates
+- Irrelevant here
+
+## Ray-Plane and Ray-Disk intersection
+### Ray-Plane Intersection
+- ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/plane.png?)
+- Plane has the form: $(p-p_0) \cdot n = 0$
+- Ray: $l_0+l\cdot t=p$ ($l_0$: Origin, $l$: Direction, $t$: Parameter)
+- By inserting the ray Equation into the Plane Equation we get: $t=\frac{(p_0-l_0) \cdot n}{l \cdot n}
+  - Näherung: $l \cdot n < 1e-6 \rightarrow$ nearly parrallel $\rightarrow$ no Intersection Point
+
+### Ray-Disk Intersection
+- ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/disk.png?)
+- like Ray-Plane
+- Additional condition:
+  - $|{p-p_0}| <= radius$ or optimised ($r^2$ can be precomputed, no sqrt): $(p-p_0)^2 <= radius^2$
+
+## Ray-Box Intersection:
+- TODO
 
 # Common Coordinate Systems
 - [scratchapixel.com](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-camera-rays/standard-coordinate-systems)
