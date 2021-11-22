@@ -193,5 +193,21 @@ $$
 ## Ray-Box Intersection:
 - TODO
 
+
+# Check whether ray to source is behind object
+- **not from Scratchapixel**
+- ![](imgs/reflected_ray_angles.png)
+- algorithm:
+  - given: $Ray_{in}: \ R_{in}=O_{R_{in}}+tD_{R_{in}}$, $Ray_{out}:\ R_{out}=O_{R_{out}} + tD_{R_{out}}$
+  1. Compute Normal $N$ (also normalise)
+  2. Compute $\alpha_1 = \arccos(R_{in} \cdot N)$
+  3. Compute $\alpha_2 = \arccos(R_{out} \cdot N)$
+  4. Check whether $Ray_out$ is in front of object (i.e. visible):
+```py
+if (alpha_1 < 90° and alpha_2 < 90°) or (alpha_1 > 90° and alpha_2 > 90°):
+    return True
+else:
+    return False
+```
 # Common Coordinate Systems
 - [scratchapixel.com](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-camera-rays/standard-coordinate-systems)
