@@ -55,8 +55,8 @@ class Scenery:
             if nearest_object is None:
                 return RGBI([0,0,0], 0) # Background
 
-            intersect_point = add_vec(ray.offset, ray.direction.times_factor(smallest_param))
-            distance = sub_vec(ray.offset, intersect_point).sum()
+            intersect_point = ray.offset.add(ray.direction.times_factor(smallest_param))
+            distance = ray.offset.sub(intersect_point).sum()
 
             if nearest_object == self.source:
                 return nearest_object.rgb.travel(self.degradation, distance)
@@ -77,13 +77,13 @@ class Scenery:
 
             
     def get_ray_to_source(self, point: Vect) -> Ray:
-        dir = sub_vec(self.source.offset, point)
+        dir = self.source.offset.sub(point)
         dir.normalise()
         return Ray(point, dir)
     
     def source_ray_visible(self, dir_in: Vect, dir_out: Vect, normal: Vect):
-        alpha_1 = bm_to_am(angle_vec(dir_in.times_factor(-1), normal)) # needed so that in and out vector show are in the same direction
-        alpha_2 = bm_to_am(angle_vec(dir_out, normal))
+        alpha_1 = rad2deg(dir_in.times_factor(-1).angle_to(normal)) # needed so that in and out vector show are in the same direction
+        alpha_2 = rad2deg(dir_out.angle_to(normal))
 
         if (alpha_1 < 90 and alpha_2 < 90) or (alpha_1 > 90 and alpha_2 > 90):
             return True

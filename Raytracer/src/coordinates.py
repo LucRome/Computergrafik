@@ -1,69 +1,45 @@
 from typing import List
-from math import sqrt, acos, pi
+import numpy as np
 
 """
 Utils for Coordinates
 Coordinates: [x,y,z] (Datatype: float)
 """
 class Vect:
-    vals: List[float]
+    vals: np.ndarray
     def __init__(self, vals: List[float]):
-        self.vals = list()
-        for val in vals:
-            self.vals.append(val)
+        self.vals = np.array(vals, dtype=np.float32)
 
-    def sum(self) -> float:
-        res = 0
-        for i in range(0, len(self.vals)):
-            res += self.vals[i]**2
-        return sqrt(res)
+    def sum(self) -> np.float32:
+        return np.linalg.norm(self.vals)
 
     def normalise(self) -> None:
-        s = self.sum()
-        for i in range(0, len(self.vals)):
-            self.vals[i] /= s
+        self.vals = self.vals / (np.linalg.norm(self.vals)) 
 
     def times_factor(self, fac: float) -> 'Vect':
-        ret = list()
-        for val in self.vals:
-            ret.append(val * fac)
-        return Vect(ret)
+        return Vect(np.multiply(self.vals, fac))
 
-    def dot(self, b: 'Vect') -> float:
-        res = 0
-        for i in range(0, len(self.vals)):
-            res += self.vals[i] * b.vals[i]
-        return res
+    def dot(self, b: 'Vect') -> np.float32:
+        return np.dot(self.vals, b.vals)
 
-    def square(self) -> float:
-        return self.dot(self)
+    def square(self) -> np.float32:
+        return np.dot(self.vals, self.vals)
 
-def add_vec(a: Vect, b: Vect) -> Vect:
-    lst = list()
-    for i in range(0, len(a.vals)):
-        lst.append(a.vals[i] + b.vals[i])
-    return Vect(lst)
+    def add(self, b: 'Vect') -> 'Vect':
+        return Vect(np.add(self.vals, b.vals))
     
-def sub_vec(a: Vect, b: Vect) -> Vect:
-    lst = list()
-    for i in range(0, len(a.vals)):
-        lst.append(a.vals[i] - b.vals[i])
-    return Vect(lst)
+    def sub(self, b: 'Vect') -> 'Vect':
+        return Vect(np.subtract(self.vals, b.vals))
+    
+    def angle_to(self, b:'Vect') -> np.float32:
+        "angle in radians"
+        self.normalise()
+        b.normalise()
+        return np.arccos(np.clip(self.dot(b), -1.0, 1.0))
 
-def angle_vec(a: Vect, b: Vect) -> float:
-    "Winkel im Bogenmaß (also von 0 - 2pi)"
-    a.normalise()
-    b.normalise()
-    dp = a.dot(b)
-    if dp > 1:
-        dp = 1
-    elif dp < -1:
-        dp = -1
-    return acos(dp)
-
-def bm_to_am(angle: float) -> float:
+def rad2deg(angle: float) -> float:
     "Bogenmaß zu Winkelmaß"
-    return angle * 360 / (2*pi)
+    return np.rad2deg(angle)
 
 class Ray:
     offset: Vect

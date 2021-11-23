@@ -3,7 +3,7 @@ from typing import List
 from colors import RGBI
 
 
-from coordinates import Vect, Ray, add_vec, sub_vec
+from coordinates import Vect, Ray
 
 class Object:
     rgb: RGBI
@@ -33,8 +33,8 @@ class Sphere(Object):
     
     def get_intersect_pnt_params(self, ray: Ray) -> List[float]: #returns t_0 and t_1
         a = ray.direction.square()
-        b = 2 * ray.direction.dot(sub_vec(ray.offset, self.offset))
-        c = sub_vec(self.offset, ray.offset).sum() ** 2 - self.radius**2
+        b = 2 * ray.direction.dot(ray.offset.sub(self.offset))
+        c = self.offset.sub(ray.offset).sum() ** 2 - self.radius**2
 
         discriminant = b**2 - 4*a*c
         if discriminant < 0:
@@ -46,7 +46,7 @@ class Sphere(Object):
             return list([q/a, c/q])
         
     def get_normal(self, point: Vect) -> Vect:
-        vec = sub_vec(point, self.offset)
+        vec = point.sub(self.offset)
         vec.normalise()
         return vec
 

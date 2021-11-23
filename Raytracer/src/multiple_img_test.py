@@ -1,4 +1,3 @@
-import pathlib
 from time import time_ns, struct_time 
 
 from PIL.Image import Image

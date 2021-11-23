@@ -1,6 +1,6 @@
 from math import tan
 from typing import List
-from coordinates import Vect, Ray, add_vec, sub_vec
+from coordinates import Vect, Ray
 
 # Would use a c2w matrix but no idea how it works atm
 """
