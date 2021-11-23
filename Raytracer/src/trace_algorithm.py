@@ -4,21 +4,35 @@ from camera import CameraSimple
 from coordinates import *
 from objects import Object
 from typing import List
+from PIL import Image
 
-DEGRADATION = 0
+import numpy as np
 
 class Scenery:
     objects: List[Object]
     camera: CameraSimple
     source: Object
     max_revisions: int
+    degradation: int
     
-    def __init__(self, objects: List[Object], camera: CameraSimple, source: Object, revisions: int) -> None:
+    def __init__(self, objects: List[Object], camera: CameraSimple, source: Object, revisions: int, degradation: float) -> None:
         self.objects = list(objects)
         self.camera = camera
         self.source = source
         self.objects.append(source)
         self.max_revisions = revisions
+        self.degradation = degradation
+
+    def render_img(self) -> Image.Image:
+        data = np.zeros((self.camera.height, self.camera.width, 3), dtype=np.uint8)
+
+        for x in range(0,self.camera.width):
+            for y in range(0,self.camera.height):
+                rgbi = self.send_ray(x/self.camera.width, y/self.camera.height)
+                data[y, x] = rgbi.to_array()
+
+        return Image.fromarray(data, 'RGB')
+
     
     def send_ray(self, x: int, y: int) -> RGBI:
         ray = self.camera.get_ray(x,y)
@@ -45,7 +59,7 @@ class Scenery:
             distance = sub_vec(ray.offset, intersect_point).sum()
 
             if nearest_object == self.source:
-                return nearest_object.rgb.travel(DEGRADATION, distance)
+                return nearest_object.rgb.travel(self.degradation, distance)
 
             source_ray = self.get_ray_to_source(intersect_point)
             if (self.source_ray_visible(
@@ -54,10 +68,10 @@ class Scenery:
                 normal=nearest_object.get_normal(intersect_point)
             )):
                 if (nearest_object.is_source):
-                    return nearest_object.rgb.travel(DEGRADATION, distance) # 
+                    return nearest_object.rgb.travel(self.degradation, distance) # 
                 else:
                     rgb_source = self.trace_ray(source_ray, rev + 1)
-                    return rgb_source.interpolate(nearest_object.rgb).travel(DEGRADATION, distance)
+                    return rgb_source.interpolate(nearest_object.rgb).travel(self.degradation, distance)
             else:
                 return RGBI(nearest_object.rgb.vals, 0) # Shadow
 

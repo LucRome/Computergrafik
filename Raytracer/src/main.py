@@ -21,13 +21,6 @@ camera = CameraSimple(W, H, 70)
 
 scenery = Scenery(objects, camera, source, REVISIONS)
 
-data = np.zeros((H, W, 3), dtype=np.uint8)
-
-for x in range(0,W):
-    for y in range(0,H):
-        rgbi = scenery.send_ray(x/W,y/W)
-        data[y, x] = rgbi.to_array()
-
-img = Image.fromarray(data, 'RGB')
+img = scenery.render_img()
 img.save('my.png')
 img.show()
