@@ -1,5 +1,4 @@
-from math import tan
-from typing import List
+import numpy as np
 from coordinates import Vect, Ray
 
 # Would use a c2w matrix but no idea how it works atm
@@ -35,17 +34,17 @@ class Camera:
 """
 
 class CameraSimple:
-    width: int
-    height: int
-    fov: int
-    aspect_ratio: float
-    tan_alpha_half: float
-    def __init__(self, width: int, height: int, fov: int) -> None:
-        self.width = int(width)
-        self.height = int(height)
-        self.fov = int(fov)
-        self.aspect_ratio = self.width / self.height
-        self.tan_alpha_half = tan(fov/2)
+    width: np.int32
+    height: np.int32
+    fov: np.int32
+    aspect_ratio: np.float32
+    tan_alpha_half: np.float32
+    def __init__(self, width: np.int32, height: np.int32, fov: np.int32) -> None:
+        self.width = np.int32(width)
+        self.height = np.int32(height)
+        self.fov = np.int32(fov)
+        self.aspect_ratio = np.divide(self.width, self.height)
+        self.tan_alpha_half = np.tan(fov/2)
 
     def get_ray(self, x: int, y: int) -> Ray:
         x_cam = (2 * x - 1) * self.aspect_ratio * self.tan_alpha_half

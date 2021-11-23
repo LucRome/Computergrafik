@@ -1,5 +1,8 @@
 from math import sqrt
 from typing import List
+
+import numpy as np
+
 from colors import RGBI
 
 
@@ -31,19 +34,19 @@ class Sphere(Object):
         self.radius = radius
 
     
-    def get_intersect_pnt_params(self, ray: Ray) -> List[float]: #returns t_0 and t_1
+    def get_intersect_pnt_params(self, ray: Ray) -> np.ndarray: #returns t_0 and t_1
         a = ray.direction.square()
         b = 2 * ray.direction.dot(ray.offset.sub(self.offset))
         c = self.offset.sub(ray.offset).sum() ** 2 - self.radius**2
 
         discriminant = b**2 - 4*a*c
         if discriminant < 0:
-            return list()
+            return np.array([])
         elif discriminant == 0:
-            return list([-b/(2*a)])
+            return np.array([-b/(2*a)])
         else:
-            q = - 0.5 * (b + sign(b) * sqrt(b**2 - 4*a*c))
-            return list([q/a, c/q])
+            q = - np.divide((b + sign(b) * np.sqrt(b**2 - 4*a*c)), 2)
+            return np.array([np.divide(q,a), np.divide(c,a)])
         
     def get_normal(self, point: Vect) -> Vect:
         vec = point.sub(self.offset)

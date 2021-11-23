@@ -23,15 +23,15 @@ class Scenery:
         self.max_revisions = revisions
         self.degradation = degradation
 
-    def render_img(self) -> Image.Image:
+    def render_img_to_array(self) -> np.ndarray:
         data = np.zeros((self.camera.height, self.camera.width, 3), dtype=np.uint8)
 
         for x in range(0,self.camera.width):
             for y in range(0,self.camera.height):
                 rgbi = self.send_ray(x/self.camera.width, y/self.camera.height)
-                data[y, x] = rgbi.to_array()
+                data[y, x] = rgbi.get_val_array()
 
-        return Image.fromarray(data, 'RGB')
+        return data
 
     
     def send_ray(self, x: int, y: int) -> RGBI:

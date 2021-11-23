@@ -21,6 +21,6 @@ camera = CameraSimple(W, H, 70)
 
 scenery = Scenery(objects, camera, source, REVISIONS)
 
-img = scenery.render_img()
+img = scenery.render_img_to_array()
 img.save('my.png')
 img.show()
