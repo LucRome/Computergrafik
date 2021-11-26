@@ -44,7 +44,7 @@ class CameraSimple:
         self.height = np.int32(height)
         self.fov = np.int32(fov)
         self.aspect_ratio = np.divide(self.width, self.height)
-        self.tan_alpha_half = np.tan(fov/2)
+        self.tan_alpha_half = np.tan(np.deg2rad(fov/2))
 
     def get_ray(self, x: int, y: int) -> Ray:
         x_cam = (2 * x - 1) * self.aspect_ratio * self.tan_alpha_half

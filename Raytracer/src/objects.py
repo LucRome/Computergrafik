@@ -36,7 +36,7 @@ class Sphere(Object):
     def get_intersect_pnt_params(self, ray: Ray) -> np.ndarray: #returns t_0 and t_1
         a = np.dot(ray.direction, ray.direction)
         b = 2 * np.dot(ray.direction, np.subtract(ray.offset, self.offset))
-        c = np.square(np.linalg.norm(np.subtract(self.offset, ray.offset))) - np.square(self.radius)
+        c = np.square(np.linalg.norm(np.subtract(ray.offset, self.offset))) - np.square(self.radius)
 
         discriminant = b**2 - 4*a*c
         if discriminant < 0:
@@ -44,8 +44,8 @@ class Sphere(Object):
         elif discriminant == 0:
             return np.array([-b/(2*a)])
         else:
-            q = - np.divide((b + sign(b) * np.sqrt(b**2 - 4*a*c)), 2)
-            return np.array([np.divide(q,a), np.divide(c,a)])
+            q = - np.divide((b + sign(b) * np.sqrt(np.square(b) - 4*a*c)), 2)
+            return np.array([np.divide(q,a), np.divide(c,q)])
         
     def get_normal(self, point: np.ndarray) -> np.ndarray:
         vec = np.subtract(point, self.offset)

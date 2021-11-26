@@ -6,8 +6,8 @@ Coordinates: [x,y,z] (Datatype: float)
 """
 def normalise(vec: np.ndarray) -> None:
     nrm = np.linalg.norm(vec)
-    for val in vec:
-        val = np.divide(val, nrm)
+    for i in range(0, len(vec)):
+        vec[i] = np.divide(vec[i], nrm)
 
 def angle(a: np.ndarray, b: np.ndarray) -> np.float32:
     normalise(a)

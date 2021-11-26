@@ -46,6 +46,7 @@ class Scenery:
         return self.trace_ray(ray)
 
     def trace_ray(self, ray: Ray, rev: int = 0) -> RGBI:
+        normalise(ray.direction)
         if rev > self.max_revisions:
             return RGBI([0,0,0]) # Shadow Ray
         else:
