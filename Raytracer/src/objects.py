@@ -6,12 +6,12 @@ import numpy as np
 from colors import RGBI
 
 
-from coordinates import Vect, Ray
+from coordinates import Ray, normalise
 
 class Object:
     rgb: RGBI
     is_source: bool
-    offset: Vect
+    offset: np.ndarray
 
     def __init__(self, rgbi, is_source, offset) -> None:
         self.rgb = rgbi
@@ -21,23 +21,22 @@ class Object:
     def get_intersect_pnt_params(self, ray: Ray) -> List[float]:
         pass
 
-    def get_normal(self, point: Vect) -> Vect:
+    def get_normal(self, point: np.ndarray) -> np.ndarray:
         pass
 
 class Sphere(Object):
     radius: float
-    offset: Vect
 
-    def __init__(self, rgbi: RGBI, radius: float, offset: Vect) -> None:
+    def __init__(self, rgbi: RGBI, radius: float, offset: np.ndarray) -> None:
         is_source = rgbi.illumination > 0
         super().__init__(rgbi, is_source, offset)
         self.radius = radius
 
     
     def get_intersect_pnt_params(self, ray: Ray) -> np.ndarray: #returns t_0 and t_1
-        a = ray.direction.square()
-        b = 2 * ray.direction.dot(ray.offset.sub(self.offset))
-        c = self.offset.sub(ray.offset).sum() ** 2 - self.radius**2
+        a = np.dot(ray.direction, ray.direction)
+        b = 2 * np.dot(ray.direction, np.subtract(ray.offset, self.offset))
+        c = np.square(np.linalg.norm(np.subtract(self.offset, ray.offset))) - np.square(self.radius)
 
         discriminant = b**2 - 4*a*c
         if discriminant < 0:
@@ -48,9 +47,9 @@ class Sphere(Object):
             q = - np.divide((b + sign(b) * np.sqrt(b**2 - 4*a*c)), 2)
             return np.array([np.divide(q,a), np.divide(c,a)])
         
-    def get_normal(self, point: Vect) -> Vect:
-        vec = point.sub(self.offset)
-        vec.normalise()
+    def get_normal(self, point: np.ndarray) -> np.ndarray:
+        vec = np.subtract(point, self.offset)
+        normalise(vec)
         return vec
 
 def sign(x: float):

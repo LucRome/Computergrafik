@@ -15,7 +15,7 @@ class RGBI:
         illu = (self.illumination + b.illumination) % 101
         return RGBI(vals, illu)
 
-    def travel(self, degradation: int, distance: float) -> 'RGBI':
+    def travel(self, degradation: float, distance: float) -> 'RGBI':
         return RGBI(self.vals, self.illumination - (degradation * distance))
 
     def get_val_array(self) -> np.ndarray:

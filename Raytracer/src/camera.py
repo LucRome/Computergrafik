@@ -1,5 +1,5 @@
 import numpy as np
-from coordinates import Vect, Ray
+from coordinates import Ray
 
 # Would use a c2w matrix but no idea how it works atm
 """
@@ -49,5 +49,4 @@ class CameraSimple:
     def get_ray(self, x: int, y: int) -> Ray:
         x_cam = (2 * x - 1) * self.aspect_ratio * self.tan_alpha_half
         y_cam = (1 - 2 * y) * self.tan_alpha_half
-        dir = Vect([x_cam, y_cam, -1])
-        return Ray(offset=Vect([0,0,0]), direction=dir)
+        return Ray(offset=np.array([0,0,0]), direction=np.array([x_cam, y_cam, -1], dtype=np.float32))

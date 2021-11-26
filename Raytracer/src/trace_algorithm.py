@@ -24,12 +24,19 @@ class Scenery:
         self.degradation = degradation
 
     def render_img_to_array(self) -> np.ndarray:
+        pixels_msg = np.divide(np.multiply(self.camera.width, self.camera.height), 100)
         data = np.zeros((self.camera.height, self.camera.width, 3), dtype=np.uint8)
 
+        n = 0
+        percent = 0
         for x in range(0,self.camera.width):
             for y in range(0,self.camera.height):
                 rgbi = self.send_ray(x/self.camera.width, y/self.camera.height)
                 data[y, x] = rgbi.get_val_array()
+                n = (n+1)%pixels_msg
+                if n == 0:
+                    print(f"Rendering:\t{percent}%\tcompleted")
+                    percent += 1
 
         return data
 
@@ -55,8 +62,8 @@ class Scenery:
             if nearest_object is None:
                 return RGBI([0,0,0], 0) # Background
 
-            intersect_point = ray.offset.add(ray.direction.times_factor(smallest_param))
-            distance = ray.offset.sub(intersect_point).sum()
+            intersect_point = np.add(ray.offset, np.multiply(ray.direction, smallest_param))
+            distance = np.linalg.norm(np.subtract(ray.offset, intersect_point))
 
             if nearest_object == self.source:
                 return nearest_object.rgb.travel(self.degradation, distance)
@@ -76,16 +83,16 @@ class Scenery:
                 return RGBI(nearest_object.rgb.vals, 0) # Shadow
 
             
-    def get_ray_to_source(self, point: Vect) -> Ray:
-        dir = self.source.offset.sub(point)
-        dir.normalise()
+    def get_ray_to_source(self, point: np.ndarray) -> Ray:
+        dir = np.subtract(self.source.offset, point)
+        normalise(dir)
         return Ray(point, dir)
     
-    def source_ray_visible(self, dir_in: Vect, dir_out: Vect, normal: Vect):
-        alpha_1 = rad2deg(dir_in.times_factor(-1).angle_to(normal)) # needed so that in and out vector show are in the same direction
-        alpha_2 = rad2deg(dir_out.angle_to(normal))
+    def source_ray_visible(self, dir_in: np.ndarray, dir_out: np.ndarray, normal: np.ndarray):
+        alpha_1 = np.rad2deg(angle(np.multiply(dir_in, -1) ,normal)) # needed so that in and out vector show are in the same direction
+        alpha_2 = np.rad2deg(angle(dir_out, normal))
 
-        if (alpha_1 < 90 and alpha_2 < 90) or (alpha_1 > 90 and alpha_2 > 90):
+        if (alpha_1 < 90) == (alpha_2 < 90):
             return True
         else:
             return False

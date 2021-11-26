@@ -12,10 +12,10 @@ W = 500
 REVISIONS = 2
 
 objects = [
-    Sphere(RGBI([0,255,0], 0), 1, Vect([0,0,-4])), # green sphere (no source)
+    Sphere(RGBI([0,255,0], 0), 1, np.array([0,0,-4])), # green sphere (no source)
 ]
 
-source = Sphere(RGBI([255,255,255], 100), 0.1, Vect([0, 5, -1])) # white source
+source = Sphere(RGBI([255,255,255], 100), 0.1, np.array([0, 5, -1])) # white source
 
 camera = CameraSimple(W, H, 70)
 
