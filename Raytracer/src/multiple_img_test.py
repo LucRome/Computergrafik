@@ -41,7 +41,7 @@ def small_image():
 def medium_image():
     print("----------------\nmedium (HD) image with few revisions")
     camera = CameraSimple(width=1920, height=1080, fov=90)
-    scenery = Scenery(OBJECTS, camera ,SOURCE, revisions=2, degradation=0.1)
+    scenery = Scenery(OBJECTS, camera ,SOURCE, revisions=2, degradation=1)
     start_time = time_ns()
     data = scenery.render_img_to_array()
     post_render_stuff(start_time, time_ns(), data, 'medium.png')
@@ -49,7 +49,7 @@ def medium_image():
 def large_image():
     print("----------------\n4k image with few revisions")
     camera = CameraSimple(width=3840, height=2160, fov=90)
-    scenery = Scenery(OBJECTS, camera ,SOURCE, revisions=2, degradation=0)
+    scenery = Scenery(OBJECTS, camera ,SOURCE, revisions=2, degradation=1)
     start_time = time_ns()
     data = scenery.render_img_to_array()
     post_render_stuff(start_time, time_ns(), data, 'large.png')

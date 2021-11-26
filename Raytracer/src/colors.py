@@ -19,4 +19,5 @@ class RGBI:
         return RGBI(self.vals, self.illumination - (degradation * distance))
 
     def get_val_array(self) -> np.ndarray:
-        return self.vals
+        fac = np.divide(self.illumination, 100)
+        return np.multiply(self.vals, self.illumination)
