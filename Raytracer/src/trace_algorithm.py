@@ -64,7 +64,7 @@ class Scenery:
                 return RGBI([0,0,0], 0) # Background
 
             intersect_point = np.add(ray.offset, np.multiply(ray.direction, smallest_param))
-            distance = np.linalg.norm(np.subtract(ray.offset, intersect_point))
+            distance = np.abs(np.linalg.norm(np.subtract(ray.offset, intersect_point)))
 
             if nearest_object == self.source:
                 return nearest_object.rgb.travel(self.degradation, distance)
@@ -79,7 +79,7 @@ class Scenery:
                     return nearest_object.rgb.travel(self.degradation, distance) # 
                 else:
                     rgb_source = self.trace_ray(source_ray, rev + 1)
-                    return rgb_source.interpolate(nearest_object.rgb).travel(self.degradation, distance)
+                    return rgb_source.interpolate(nearest_object.rgb.travel(self.degradation, distance))
             else:
                 return RGBI(nearest_object.rgb.vals, 0) # Shadow
 

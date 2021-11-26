@@ -32,7 +32,7 @@ def post_render_stuff(ts: float, te: float, data: np.ndarray, img_name: str):
 def small_image():
     print("----------------\nsmall image with few revisions")
     camera = CameraSimple(width=480, height=360, fov=90)
-    scenery = Scenery(OBJECTS, camera ,SOURCE, revisions=2, degradation=10)
+    scenery = Scenery(OBJECTS, camera ,SOURCE, revisions=2, degradation=5)
     start_time = time_ns()
     data =  scenery.render_img_to_array()
     post_render_stuff(start_time, time_ns(), data, 'small.png')
