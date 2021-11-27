@@ -181,7 +181,7 @@ $$
 - ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/plane.png?)
 - Plane has the form: $(p-p_0) \cdot n = 0$
 - Ray: $l_0+l\cdot t=p$ ($l_0$: Origin, $l$: Direction, $t$: Parameter)
-- By inserting the ray Equation into the Plane Equation we get: $t=\frac{(p_0-l_0) \cdot n}{l \cdot n}
+- By inserting the ray Equation into the Plane Equation we get: $t=\frac{(p_0-l_0) \cdot n}{l \cdot n}$
   - Näherung: $l \cdot n < 1e-6 \rightarrow$ nearly parrallel $\rightarrow$ no Intersection Point
 
 ### Ray-Disk Intersection
