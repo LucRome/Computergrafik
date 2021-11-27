@@ -2,6 +2,7 @@ from unittest import TestLoader, TestSuite, TextTestRunner
 
 from material_tests import MaterialTests
 from coordinate_tests import CoordinateUtilsTests
+from object_tests import PlaneTests
 
 
 if __name__ == '__main__':
@@ -9,7 +10,8 @@ if __name__ == '__main__':
     tests = [
         # add loader.loadTestsFromTestCase(<class>) for each TestCase
         loader.loadTestsFromTestCase(MaterialTests),
-        loader.loadTestsFromTestCase(CoordinateUtilsTests)
+        loader.loadTestsFromTestCase(CoordinateUtilsTests),
+        loader.loadTestsFromTestCase(PlaneTests)
     ]
     suite = TestSuite(tests)
     runner = TextTestRunner(verbosity=2)
