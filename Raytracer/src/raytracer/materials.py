@@ -39,3 +39,13 @@ class Material:
             rgb=self.rgb,
             illumination=self.illumination - (degradation * distance)
         )
+
+"""
+Useful Colours
+"""
+RED = Material([255, 0, 0],0)
+GREEN = Material([0,255,0],0)
+BLUE = Material([0,0,255],0)
+
+WHITE = Material([255,255,255],0)
+WHITE_LIGHTSOURCE = Material([255,255,255],100)
