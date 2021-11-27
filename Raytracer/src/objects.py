@@ -2,6 +2,7 @@ from math import sqrt
 from typing import List
 
 import numpy as np
+from numpy.linalg import norm
 
 from colors import RGBI
 
@@ -54,3 +55,23 @@ class Sphere(Object):
 
 def sign(x: float):
     return -1 if x < 0 else 1
+
+class Plane(Object):
+    normal: np.ndarray
+
+    def __init__(self, rgbi: RGBI, offset: np.ndarray, vec1: np.ndarray, vec2: np.ndarray) -> None:
+        is_source = rgbi.illumination > 0
+        super().__init__(rgbi, is_source, offset)
+        self.normal = np.array(np.cross(vec1, vec2), dtype=np.float32)
+        normalise(self.normal)
+    
+    def get_intersect_pnt_params(self, ray: Ray) -> np.ndarray:
+        normalise(ray.direction)
+        n_l = np.dot(self.normal, ray.direction)
+        if np.abs(n_l) < 1e-6:
+            return []
+        else:
+            return np.array([np.divide(np.dot(np.subtract(self.offset, ray.offset), self.normal), n_l)], dtype=np.float32)
+
+    def get_normal(self, point: np.ndarray) -> np.ndarray:
+        return self.normal

@@ -18,6 +18,7 @@ def rad2deg(angle: float) -> np.float32:
     "radial to degrees"
     return np.rad2deg(angle)
 
+
 class Ray:
     offset: np.ndarray
     direction: np.ndarray

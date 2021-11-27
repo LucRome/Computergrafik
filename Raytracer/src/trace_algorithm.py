@@ -54,6 +54,7 @@ class Scenery:
             smallest_param: float = inf
             nearest_object: Object = None
             for object in self.objects:
+                # There likely is some error with the intersect params 
                 intersect_point_params = object.get_intersect_pnt_params(ray)
                 for param in intersect_point_params:
                     if param > 0 and param < smallest_param:

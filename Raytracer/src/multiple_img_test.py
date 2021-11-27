@@ -2,7 +2,7 @@ from time import time_ns, struct_time
 
 from PIL import Image
 from camera import CameraSimple
-from objects import Object, Sphere
+from objects import Object, Sphere, Plane
 from colors import RGBI
 from coordinates import *
 from trace_algorithm import Scenery
@@ -12,10 +12,14 @@ from math import floor
 IMG_FOLDER = Path(__file__).resolve().parent.joinpath('imgs')
 
 
+# OBJECTS = [
+#     Sphere(RGBI([0,0,255],0), 4, np.array([0, 0, -20])),
+#     Sphere(RGBI([255,0,0],0), 9, np.array([20, 0, -35])),
+#     Sphere(RGBI([0,255,255],0), 13, np.array([-5, 15, -40]))
+# ]
+
 OBJECTS = [
-    Sphere(RGBI([0,0,255],0), 4, np.array([0, 0, -20])),
-    Sphere(RGBI([255,0,0],0), 9, np.array([20, 0, -35])),
-    Sphere(RGBI([0,255,255],0), 13, np.array([-5, 15, -40]))
+    Plane(RGBI([0,0,255]), np.array([0,0,-10]), np.array([1,0,0]), np.array([0, 4, -1])),
 ]
 
 SOURCE = Sphere(RGBI([255,255,255], 100), 0.1, np.array([0, 10, -10]))
