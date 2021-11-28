@@ -10,6 +10,7 @@ Definitions regarding the Material of Objects
 ILLUMINATION_MAX = 100
 RGB_MAX = 256
 
+" Rename Class (isn't the material of an Object, but the light information of a ray) "
 class Material:
     rgb: np.ndarray
     illumination: np.uint8
@@ -39,6 +40,11 @@ class Material:
             rgb=self.rgb,
             illumination=self.illumination - (degradation * distance)
         )
+    
+    def to_rgb_array(self) -> np.ndarray:
+        fac = np.divide(self.illumination, 100)
+        tmp = list(map(lambda x: np.clip(np.multiply(x, fac), 0, 255), self.rgb))
+        return np.array(tmp, dtype=np.uint8)
 
 """
 Useful Colours

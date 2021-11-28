@@ -30,3 +30,9 @@ class MaterialTests(TestCase):
         a = Material([0,0,0], illu_start)
         b= a.travel(dis, degrad)
         self.assertEqual(illu_exp, b.illumination)
+    
+    def test_return(self):
+        mat = Material([240, 90, 4], 50)
+        expected = [120, 45, 2]
+        real = mat.to_rgb_array()
+        self.assertTrue(np.equal(expected, real).all())
