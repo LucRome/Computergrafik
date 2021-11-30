@@ -30,7 +30,7 @@ class Material:
             illumination=np.clip(self.illumination + b.illumination, 0, ILLUMINATION_MAX) 
         )
     
-    def travel(self, distance: np.uint32, degradation: np.float16) -> 'Material':
+    def travel(self, distance: np.float64, degradation: np.float16) -> 'Material':
         """
         Params:
             distance: traveled distance (> 0)
@@ -49,6 +49,7 @@ class Material:
 """
 Useful Colours
 """
+SHADOW_MATERIAL = Material([0,0,0],0)
 RED = Material([255, 0, 0],0)
 GREEN = Material([0,255,0],0)
 BLUE = Material([0,0,255],0)
