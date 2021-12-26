@@ -38,7 +38,7 @@ class Plane(Object):
         if np.abs(ln) < 1e-6:
             return [] # nearly parrallel -> no Intersect Point
         else:
-            return [np.divide(np.dot(self.offset - ray.offset, self.normal), ln)]
+            return [np.dot(self.offset - ray.offset, self.normal) / ln]
         
     def get_normal(self, point: np.ndarray):
         return self.normal
@@ -53,18 +53,18 @@ class Sphere(Object):
 
     def get_intersection_params(self, ray: Ray):
         a = 1 # Rays are normalised
-        b = np.multiply(2, np.dot(ray.direction, np.subtract(ray.offset, self.offset)))
-        c = np.subtract(np.square(np.linalg.norm(np.subtract(ray.offset, self.offset))), np.square(self.radius))
+        b = 2 * np.dot(ray.direction, (ray.offset - self.offset))
+        c = np.square(np.linalg.norm(ray.offset - self.offset)) - np.square(self.radius)
 
-        discriminant = np.subtract(np.square(b), np.multiply(4, np.multiply(a, c)))
+        discriminant = np.square(b) - (4 * a * c)
         if discriminant < 0:
             return []
         else:
-            q = - np.multiply(0.5, np.add(b, np.multiply(sign(b), np.sqrt(discriminant))))
+            q = - 0.5 * (b + (sign(b) * np.sqrt(discriminant)))
             if discriminant == 0:
-                return [np.divide(q, a)]
+                return [(q / a)]
             else:
-                return [np.divide(q,a), np.divide(c,q)]
+                return [(q/a), (c/q)]
     
     def get_normal(self, point: np.ndarray):
         return normalise(point - self.offset)

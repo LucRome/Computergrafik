@@ -42,8 +42,8 @@ class Material:
         )
     
     def to_rgb_array(self) -> np.ndarray:
-        fac = np.divide(self.illumination, 100)
-        tmp = list(map(lambda x: np.clip(np.multiply(x, fac), 0, 255), self.rgb))
+        fac = self.illumination / 100
+        tmp = list(map(lambda x: np.clip(x * fac, 0, 255), self.rgb))
         return np.array(tmp, dtype=np.uint8)
 
 """

@@ -63,7 +63,7 @@ class Scenery:
             return SHADOW_MATERIAL
 
         # compute distance and intersect Point
-        intersect_point = np.add(ray.offset, np.multiply(ray.direction, closest_param))
+        intersect_point = ray.offset + (ray.direction * closest_param)
         distance = closest_param # travels 1 unit per param (since ray.direction is normalised)
         
         if closest_obj.is_source:
@@ -72,7 +72,7 @@ class Scenery:
         else:
             # continue tracing ray recursively and interpolate the returned light information with the one 
             # of the closest object, then let the light travel the distance to the start point
-            dir = np.subtract(self.source.offset, intersect_point)
+            dir = (self.source.offset - intersect_point)
                 # TODO: catch that ray might be behind object when object is between viewer and source
             mat = self.trace_ray(Ray(intersect_point, dir), depth + 1)
             return closest_obj.material.interpolate(mat).travel(distance, self.light_degradation)

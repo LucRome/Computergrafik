@@ -11,7 +11,7 @@ class Ray():
 
 def normalise(vec: np.ndarray) -> np.ndarray:
     norm = np.linalg.norm(vec)
-    return vec/norm # the same as np.divide(vec, norm)
+    return vec / norm
 
 def is_normalised(vec: np.ndarray) -> bool:
     return (np.linalg.norm(vec) == 1)
