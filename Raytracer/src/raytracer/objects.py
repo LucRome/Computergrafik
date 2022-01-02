@@ -1,8 +1,12 @@
+from numpy import linalg
 from raytracer.coordinate_utils import normalise, Ray
-from raytracer.materials import Material
+from raytracer.materials import Material, SHADOW_MATERIAL
 
+from math import inf
 from typing import List
 import numpy as np
+
+
 """
 The Classes representing the Objects in the 3D Space
 """
@@ -73,3 +77,68 @@ class LightSphere(Sphere):
     
     def __init__(self, radius: np.float64, rgb_color: List[np.int8], offset: List[np.float64]) -> None:
         super().__init__(radius, Material(rgb_color, 100), offset)
+
+
+class CuboidVertical(Object):
+    """
+    Represents a cuboid, with it's height always in the y-direction
+    """
+    x_max: float
+    y_max: float
+    z_max: float
+    bounding_sphere: Sphere
+    # Surface Planes
+    x_y_surfaces: List[Plane]
+    x_z_surfaces: List[Plane]
+    y_z_surfaces: List[Plane]
+
+    def __init__(self, width:float, height: float, depth: float, material: Material, offset: List[np.float64]) -> None:
+        super().__init__(material, offset)
+        self.y_max = height
+        self.x_max = width
+        self.z_max = depth
+        radius = max([width, height, depth])
+        self.bounding_sphere = Sphere(radius, SHADOW_MATERIAL, offset)
+        self.x_y_surfaces = list(
+            Plane([width, 0, 0], [0, height, 0], offset, SHADOW_MATERIAL),
+            Plane([width, 0, 0], [0, height, 0], (offset + [0,0,depth]), SHADOW_MATERIAL)
+        )
+        self.x_z_surfaces = list(
+            Plane([width, 0, 0], [0, 0, depth], offset, SHADOW_MATERIAL),
+            Plane([width, 0, 0], [0, 0, depth], (offset + [0, height, 0]), SHADOW_MATERIAL)
+        )
+        self.y_z_surfaces = list(
+            Plane([0, height, 0], [0, 0, depth], offset, SHADOW_MATERIAL),
+            Plane([0, height, 0], [0, 0, depth], (offset + [width, 0, 0]), SHADOW_MATERIAL)
+        )
+
+    def get_intersection_params(self, ray: Ray):
+        if len(self.bounding_sphere.get_intersection_params()) > 0:
+            nearest_param: np.float64 = inf
+
+            for plane in self.x_y_surfaces:
+                params = plane.get_intersection_params()
+                if len(params) > 0 and params[0] < nearest_param:
+                    intersect_point = ray.offset + params[0] * ray.direction - self.offset # Compute Intersect Point and bring it into the cubicle coordinate system
+                    if intersect_point[0] <= self.x_max and intersect_point[1] <= self.y_max:
+                        nearest_param = params[0]
+            for plane in self.x_z_surfaces:
+                params = plane.get_intersection_params()
+                if len(params) > 0 and params[0] < nearest_param:
+                    intersect_point = ray.offset + params[0] * ray.direction - self.offset
+                    if intersect_point[0] <= self.x_max and intersect_point[2] <= self.z_max:
+                        nearest_param = params[0]
+            for plane in self.y_z_surfaces:
+                params = plane.get_intersection_params()
+                if len(params) > 0 and params[0] < nearest_param:
+                    intersect_point = ray.offset + params[0] * ray.direction - self.offset
+                    if intersect_point[1] <= self.y_max and intersect_point[2] <= self.z_max:
+                        nearest_param = params[0]
+            
+            return nearest_param
+        return []
+    
+    def get_normal(self, point: np.ndarray):
+        x, y, z = point - self.offset
+        if x == 0 or x == self.x_max:
+            
