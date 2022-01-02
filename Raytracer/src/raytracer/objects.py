@@ -98,47 +98,60 @@ class CuboidVertical(Object):
         self.x_max = width
         self.z_max = depth
         radius = max([width, height, depth])
-        self.bounding_sphere = Sphere(radius, SHADOW_MATERIAL, offset)
-        self.x_y_surfaces = list(
+        self.bounding_sphere = Sphere(radius, SHADOW_MATERIAL, np.add(offset, [width/2, height/2, depth/2]))
+        self.x_y_surfaces = list([
             Plane([width, 0, 0], [0, height, 0], offset, SHADOW_MATERIAL),
-            Plane([width, 0, 0], [0, height, 0], (offset + [0,0,depth]), SHADOW_MATERIAL)
-        )
-        self.x_z_surfaces = list(
+            Plane([width, 0, 0], [0, height, 0], np.add(offset, [0,0,depth]), SHADOW_MATERIAL)
+        ])
+        self.x_z_surfaces = list([
             Plane([width, 0, 0], [0, 0, depth], offset, SHADOW_MATERIAL),
-            Plane([width, 0, 0], [0, 0, depth], (offset + [0, height, 0]), SHADOW_MATERIAL)
-        )
-        self.y_z_surfaces = list(
+            Plane([width, 0, 0], [0, 0, depth], np.add(offset, [0, height, 0]), SHADOW_MATERIAL)
+        ])
+        self.y_z_surfaces = list([
             Plane([0, height, 0], [0, 0, depth], offset, SHADOW_MATERIAL),
-            Plane([0, height, 0], [0, 0, depth], (offset + [width, 0, 0]), SHADOW_MATERIAL)
-        )
+            Plane([0, height, 0], [0, 0, depth], np.add(offset, [width, 0, 0]), SHADOW_MATERIAL)
+        ])
 
     def get_intersection_params(self, ray: Ray):
-        if len(self.bounding_sphere.get_intersection_params()) > 0:
+        #if len(self.bounding_sphere.get_intersection_params(ray)) > 0:
             nearest_param: np.float64 = inf
 
             for plane in self.x_y_surfaces:
-                params = plane.get_intersection_params()
+                params = plane.get_intersection_params(ray)
                 if len(params) > 0 and params[0] < nearest_param:
                     intersect_point = ray.offset + params[0] * ray.direction - self.offset # Compute Intersect Point and bring it into the cubicle coordinate system
-                    if intersect_point[0] <= self.x_max and intersect_point[1] <= self.y_max:
+                    if intersect_point[0] <= self.x_max and intersect_point[0] >= 0 and intersect_point[1] <= self.y_max and intersect_point[1] >= 0:
                         nearest_param = params[0]
             for plane in self.x_z_surfaces:
-                params = plane.get_intersection_params()
+                params = plane.get_intersection_params(ray)
                 if len(params) > 0 and params[0] < nearest_param:
                     intersect_point = ray.offset + params[0] * ray.direction - self.offset
-                    if intersect_point[0] <= self.x_max and intersect_point[2] <= self.z_max:
+                    if intersect_point[0] >= 0 and intersect_point[0] <= self.x_max and intersect_point[2] >= 0 and intersect_point[2] <= self.z_max:
                         nearest_param = params[0]
             for plane in self.y_z_surfaces:
-                params = plane.get_intersection_params()
+                params = plane.get_intersection_params(ray)
                 if len(params) > 0 and params[0] < nearest_param:
                     intersect_point = ray.offset + params[0] * ray.direction - self.offset
-                    if intersect_point[1] <= self.y_max and intersect_point[2] <= self.z_max:
+                    if intersect_point[1] >= 0 and intersect_point[1] <= self.y_max and intersect_point[2] >= 0 and intersect_point[2] <= self.z_max:
                         nearest_param = params[0]
             
-            return nearest_param
-        return []
+            if nearest_param == inf:
+                return []
+            return [nearest_param]
+        #return []
     
     def get_normal(self, point: np.ndarray):
         x, y, z = point - self.offset
-        if x == 0 or x == self.x_max:
+        if x == 0:
+            return [-1, 0, 0]
+        if x == self.x_max:
+            return [1, 0, 0]
+        if y == 0:
+            return [0, -1, 0]
+        if y == self.y_max:
+            return [0, 1, 0]
+        if z == 0:
+            return [0, 0, -1]
+        if z == self.z_max:
+            return [0, 0, 1]
             
