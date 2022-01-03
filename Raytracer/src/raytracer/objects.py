@@ -1,4 +1,4 @@
-from numpy import linalg
+from numpy import float64, linalg
 from raytracer.coordinate_utils import normalise, Ray
 from raytracer.materials import Material, SHADOW_MATERIAL
 
@@ -46,6 +46,52 @@ class Plane(Object):
         
     def get_normal(self, point: np.ndarray):
         return self.normal
+
+TOLERANCE = 1e-6
+class RectanglePlane(Plane):
+    bounds_min: List[float]
+    bounds_max: List[float]
+
+    def __init__(self, vec1: List[float64], vec2: List[float64], offset: np.ndarray, material: Material) -> None:
+        """
+        width, depth, height > 0 !!!
+        """
+        super().__init__(vec1, vec2, offset, material)
+        # to catch small mistakes
+        self.bounds_min = list()
+        self.bounds_max = list()
+        for i in range(0,3):
+            self.bounds_min.append(offset[i] - TOLERANCE)
+            self.bounds_max.append(offset[i] + TOLERANCE)
+            if vec1[i] > 0:
+                self.bounds_max[i] += vec1[i]
+            else:
+                self.bounds_min[i] += vec1[i]
+            if vec2[i] > 0:
+                self.bounds_max[i] += vec2[i]
+            else:
+                self.bounds_min[i] += vec2[i]
+        
+
+
+    
+    def get_intersection_params(self, ray: Ray) -> List[np.float64]:
+        candidates = super().get_intersection_params(ray)
+        params = list()
+        for param in candidates:
+            point = ray.offset + ray.direction * param
+            in_bounds = True
+            for i in range(0, 3):
+                if not (in_bounds and point[i] <= self.bounds_max[i] and point[i] >= self.bounds_min[i]):
+                    in_bounds = False
+            if in_bounds:
+                params.append(param)
+        return params
+    
+    def get_normal(self, point: np.ndarray):
+        return super().get_normal(point)
+            
+
 
 "TODO: Tests"
 class Sphere(Object):
