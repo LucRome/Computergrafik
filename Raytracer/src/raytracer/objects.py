@@ -1,4 +1,5 @@
 from numpy import float64, linalg
+from numpy.lib.function_base import rot90
 from raytracer.coordinate_utils import normalise, Ray
 from raytracer.materials import Material, SHADOW_MATERIAL
 
@@ -46,51 +47,6 @@ class Plane(Object):
         
     def get_normal(self, point: np.ndarray):
         return self.normal
-
-TOLERANCE = 1e-6
-class RectanglePlane(Plane):
-    bounds_min: List[float]
-    bounds_max: List[float]
-
-    def __init__(self, vec1: List[float64], vec2: List[float64], offset: np.ndarray, material: Material) -> None:
-        """
-        width, depth, height > 0 !!!
-        """
-        super().__init__(vec1, vec2, offset, material)
-        # to catch small mistakes
-        self.bounds_min = list()
-        self.bounds_max = list()
-        for i in range(0,3):
-            self.bounds_min.append(offset[i] - TOLERANCE)
-            self.bounds_max.append(offset[i] + TOLERANCE)
-            if vec1[i] > 0:
-                self.bounds_max[i] += vec1[i]
-            else:
-                self.bounds_min[i] += vec1[i]
-            if vec2[i] > 0:
-                self.bounds_max[i] += vec2[i]
-            else:
-                self.bounds_min[i] += vec2[i]
-        
-
-
-    
-    def get_intersection_params(self, ray: Ray) -> List[np.float64]:
-        candidates = super().get_intersection_params(ray)
-        params = list()
-        for param in candidates:
-            point = ray.offset + ray.direction * param
-            in_bounds = True
-            for i in range(0, 3):
-                if not (in_bounds and point[i] <= self.bounds_max[i] and point[i] >= self.bounds_min[i]):
-                    in_bounds = False
-            if in_bounds:
-                params.append(param)
-        return params
-    
-    def get_normal(self, point: np.ndarray):
-        return super().get_normal(point)
-            
 
 
 "TODO: Tests"
@@ -169,24 +125,26 @@ class CuboidVertical(Object):
     def get_intersection_params(self, ray: Ray):
         #if len(self.bounding_sphere.get_intersection_params(ray)) > 0:
             nearest_param: np.float64 = inf
-            
+            new_offset =  np.dot(self.rotation_matrix, (ray.offset - self.offset))
+            new_direction =  np.dot(self.rotation_matrix, ray.direction)
+            ray_transformed = Ray(new_offset, new_direction)
 
             for plane in self.x_y_surfaces:
-                params = plane.get_intersection_params(ray)
+                params = plane.get_intersection_params(ray_transformed)
                 if len(params) > 0 and params[0] < nearest_param:
-                    x, y, z = ray.offset + params[0] * ray.direction - self.offset # Compute Intersect Point and bring it into the cubicle coordinate system
+                    x, y, z = ray_transformed.offset + params[0] * ray_transformed.direction - self.offset # Compute Intersect Point and bring it into the cubicle coordinate system
                     if x <= self.width_half and x >= -self.width_half and y <= self.height_half and y >= -self.height_half:
                         nearest_param = params[0]
             for plane in self.x_z_surfaces:
-                params = plane.get_intersection_params(ray)
+                params = plane.get_intersection_params(ray_transformed)
                 if len(params) > 0 and params[0] < nearest_param:
-                    x, y, z = ray.offset + params[0] * ray.direction - self.offset
+                    x, y, z = ray_transformed.offset + params[0] * ray_transformed.direction - self.offset
                     if x <= self.width_half and x >= -self.width_half and z <= self.depth_half and z >= -self.depth_half:
                         nearest_param = params[0]
             for plane in self.y_z_surfaces:
-                params = plane.get_intersection_params(ray)
+                params = plane.get_intersection_params(ray_transformed)
                 if len(params) > 0 and params[0] < nearest_param:
-                    x, y, z = ray.offset + params[0] * ray.direction - self.offset
+                    x, y, z = ray_transformed.offset + params[0] * ray_transformed.direction - self.offset
                     if y <= self.height_half and y >= -self.height_half and z <= self.depth_half and z >= -self.depth_half:
                         nearest_param = params[0]
             
