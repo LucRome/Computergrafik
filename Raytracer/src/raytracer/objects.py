@@ -83,56 +83,65 @@ class CuboidVertical(Object):
     """
     Represents a cuboid, with it's height always in the y-direction
     """
-    x_max: float
-    y_max: float
-    z_max: float
+    width_half: float
+    height_half: float
+    depth_half: float
     bounding_sphere: Sphere
     # Surface Planes
     x_y_surfaces: List[Plane]
     x_z_surfaces: List[Plane]
     y_z_surfaces: List[Plane]
+    # Rotation Matrix
+    rotation_matrix: np.ndarray
 
-    def __init__(self, width:float, height: float, depth: float, material: Material, offset: List[np.float64]) -> None:
-        super().__init__(material, offset)
-        self.y_max = height
-        self.x_max = width
-        self.z_max = depth
-        radius = max([width, height, depth])
-        self.bounding_sphere = Sphere(radius, SHADOW_MATERIAL, np.add(offset, [width/2, height/2, depth/2]))
+    def __init__(self, rotation: float, width:float, height: float, depth: float, material: Material, offset_center: List[np.float64]) -> None:
+        super().__init__(material, offset_center)
+        self.height_half = height / 2
+        self.width_half = width / 2
+        self.depth_half = depth / 2
+        radius = max([self.width_half, self.height_half, self.depth_half])
+        self.bounding_sphere = Sphere(radius, SHADOW_MATERIAL, offset_center)
         self.x_y_surfaces = list([
-            Plane([width, 0, 0], [0, height, 0], offset, SHADOW_MATERIAL),
-            Plane([width, 0, 0], [0, height, 0], np.add(offset, [0,0,depth]), SHADOW_MATERIAL)
+            Plane([width, 0, 0], [0, height, 0], np.add(offset_center, [0,0, -self.depth_half]), SHADOW_MATERIAL),
+            Plane([width, 0, 0], [0, height, 0], np.add(offset_center, [0,0, self.depth_half]), SHADOW_MATERIAL)
         ])
         self.x_z_surfaces = list([
-            Plane([width, 0, 0], [0, 0, depth], offset, SHADOW_MATERIAL),
-            Plane([width, 0, 0], [0, 0, depth], np.add(offset, [0, height, 0]), SHADOW_MATERIAL)
+            Plane([width, 0, 0], [0, 0, depth], np.add(offset_center, [0, -self.height_half, 0]), SHADOW_MATERIAL),
+            Plane([width, 0, 0], [0, 0, depth], np.add(offset_center, [0, self.height_half, 0]), SHADOW_MATERIAL)
         ])
         self.y_z_surfaces = list([
-            Plane([0, height, 0], [0, 0, depth], offset, SHADOW_MATERIAL),
-            Plane([0, height, 0], [0, 0, depth], np.add(offset, [width, 0, 0]), SHADOW_MATERIAL)
+            Plane([0, height, 0], [0, 0, depth], np.add(offset_center, [-self.width_half, 0, 0]), SHADOW_MATERIAL),
+            Plane([0, height, 0], [0, 0, depth], np.add(offset_center, [self.width_half, 0, 0]), SHADOW_MATERIAL)
+        ])
+        rot_rad = np.deg2rad(rotation)
+        self.rotation_matrix = np.array([
+            [np.cos(rot_rad), 0, -np.sin(rot_rad)],
+            [0, 1, 0],
+            [np.sin(rot_rad), 0, np.cos(rot_rad)]
         ])
 
     def get_intersection_params(self, ray: Ray):
         #if len(self.bounding_sphere.get_intersection_params(ray)) > 0:
             nearest_param: np.float64 = inf
+            
 
             for plane in self.x_y_surfaces:
                 params = plane.get_intersection_params(ray)
                 if len(params) > 0 and params[0] < nearest_param:
-                    intersect_point = ray.offset + params[0] * ray.direction - self.offset # Compute Intersect Point and bring it into the cubicle coordinate system
-                    if intersect_point[0] <= self.x_max and intersect_point[0] >= 0 and intersect_point[1] <= self.y_max and intersect_point[1] >= 0:
+                    x, y, z = ray.offset + params[0] * ray.direction - self.offset # Compute Intersect Point and bring it into the cubicle coordinate system
+                    if x <= self.width_half and x >= -self.width_half and y <= self.height_half and y >= -self.height_half:
                         nearest_param = params[0]
             for plane in self.x_z_surfaces:
                 params = plane.get_intersection_params(ray)
                 if len(params) > 0 and params[0] < nearest_param:
-                    intersect_point = ray.offset + params[0] * ray.direction - self.offset
-                    if intersect_point[0] >= 0 and intersect_point[0] <= self.x_max and intersect_point[2] >= 0 and intersect_point[2] <= self.z_max:
+                    x, y, z = ray.offset + params[0] * ray.direction - self.offset
+                    if x <= self.width_half and x >= -self.width_half and z <= self.depth_half and z >= -self.depth_half:
                         nearest_param = params[0]
             for plane in self.y_z_surfaces:
                 params = plane.get_intersection_params(ray)
                 if len(params) > 0 and params[0] < nearest_param:
-                    intersect_point = ray.offset + params[0] * ray.direction - self.offset
-                    if intersect_point[1] >= 0 and intersect_point[1] <= self.y_max and intersect_point[2] >= 0 and intersect_point[2] <= self.z_max:
+                    x, y, z = ray.offset + params[0] * ray.direction - self.offset
+                    if y <= self.height_half and y >= -self.height_half and z <= self.depth_half and z >= -self.depth_half:
                         nearest_param = params[0]
             
             if nearest_param == inf:
@@ -143,15 +152,15 @@ class CuboidVertical(Object):
     def get_normal(self, point: np.ndarray):
         x, y, z = point - self.offset
         if x == 0:
-            return [-1, 0, 0]
-        if x == self.x_max:
-            return [1, 0, 0]
+            return self.rotation_matrix * [-1, 0, 0]
+        if x == self.width_half:
+            return self.rotation_matrix * [1, 0, 0]
         if y == 0:
-            return [0, -1, 0]
-        if y == self.y_max:
-            return [0, 1, 0]
+            return self.rotation_matrix * [0, -1, 0]
+        if y == self.height_half:
+            return self.rotation_matrix * [0, 1, 0]
         if z == 0:
-            return [0, 0, -1]
-        if z == self.z_max:
-            return [0, 0, 1]
+            return self.rotation_matrix * [0, 0, -1]
+        if z == self.depth_half:
+            return self.rotation_matrix * [0, 0, 1]
             
