@@ -101,7 +101,7 @@ class CuboidVertical(Object):
         self.height_half = height / 2
         self.width_half = width / 2
         self.depth_half = depth / 2
-        radius = max([self.width_half, self.height_half, self.depth_half])
+        radius = np.linalg.norm([self.width_half, self.height_half, self.depth_half])
         self.bounding_sphere = Sphere(radius, SHADOW_MATERIAL, offset_center)
         self.x_y_surfaces = list([
             Plane([width, 0, 0], [0, height, 0], np.add(offset_center, [0,0, -self.depth_half]), SHADOW_MATERIAL),
@@ -123,12 +123,13 @@ class CuboidVertical(Object):
         ])
 
     def get_intersection_params(self, ray: Ray):
-        #if len(self.bounding_sphere.get_intersection_params(ray)) > 0:
-            nearest_param: np.float64 = inf
-            new_offset =  np.dot(self.rotation_matrix, (ray.offset - self.offset))
-            new_direction =  np.dot(self.rotation_matrix, ray.direction)
-            ray_transformed = Ray(new_offset, new_direction)
+        nearest_param: np.float64 = inf
+        relative_offset_transformed =  np.dot(self.rotation_matrix, (ray.offset - self.offset))
+        new_offset = relative_offset_transformed + self.offset
+        new_direction =  np.dot(self.rotation_matrix, ray.direction)
+        ray_transformed = Ray(new_offset, new_direction)
 
+        if len(self.bounding_sphere.get_intersection_params(ray_transformed)) > 0:
             for plane in self.x_y_surfaces:
                 params = plane.get_intersection_params(ray_transformed)
                 if len(params) > 0 and params[0] < nearest_param:
@@ -151,7 +152,7 @@ class CuboidVertical(Object):
             if nearest_param == inf:
                 return []
             return [nearest_param]
-        #return []
+        return []
     
     def get_normal(self, point: np.ndarray):
         x, y, z = point - self.offset
