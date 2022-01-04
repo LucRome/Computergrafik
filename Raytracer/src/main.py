@@ -27,7 +27,7 @@ OBJECTS = [
         radius=0.5,
         albedo=WHITE,
         offset=[-2,0,-5],
-        intensity=10000
+        intensity=10000000
     ),
     Sphere(2.0, RED, [0,5,-13]),
     #Sphere(4.0, BLUE, [3,2,-12]),

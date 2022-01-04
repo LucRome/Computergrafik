@@ -35,7 +35,7 @@ class Scenery:
         [x,y,n,percent] = [0,0,0,0]
         n_nxt_percent = self.camera.width * self.camera.height / 100
         for ray in self.camera.get_primary_rays():
-            data[y][x] = self.trace_ray(ray)
+            data[y][x] = self.trace_ray(ray).resolve()
             x = (x + 1) % self.camera.width
             if x == 0:
                 y = (y + 1) % self.camera.height
@@ -47,7 +47,7 @@ class Scenery:
         return data
 
     
-    def trace_ray(self, ray: Ray, depth: int = 0) -> Tuple[int, int, int]:
+    def trace_ray(self, ray: Ray, depth: int = 0) -> Light:
         if depth > self.max_depth:
             return BLACK
 
@@ -77,6 +77,6 @@ class Scenery:
             dir = (self.source.offset - intersect_point)
                 # TODO: catch that ray might be behind object when object is between viewer and source
             light_intensity = self.trace_ray(Ray(intersect_point, dir), depth + 1)
-            return get_diffuse_surface_color(closest_obj.albedo, light_intensity, normalise(closest_obj.get_normal(intersect_point)), normalise(dir))
+            return get_diffuse_surface_color(closest_obj.albedo, light_intensity, normalise(closest_obj.get_normal(intersect_point)), normalise(dir)).travel(distance)
 
 
