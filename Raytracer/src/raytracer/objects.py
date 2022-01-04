@@ -2,7 +2,7 @@ from numpy import float64, linalg
 from .light_sources import LightSource, PointLight
 from .coordinate_utils import normalise, Ray
 
-from .light_utils import BLACK
+from .light_utils import BLACK, Light
 
 from math import inf
 from typing import List, Optional, Tuple
