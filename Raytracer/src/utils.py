@@ -13,7 +13,7 @@ def test_single_pixel(scenery: Scenery, pixel_x: int, pixel_y: int) -> np.ndarra
                 y = (y + 1) % scenery.camera.height
         else:
             material = scenery.trace_ray(ray)
-            rgb = material.to_rgb_array()
+            rgb = material
             return rgb
 
 DATA_DIR = Path(__file__).resolve().parent.joinpath('data')

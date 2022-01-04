@@ -195,3 +195,38 @@ $$
 
 # Common Coordinate Systems
 - [scratchapixel.com](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-generating-camera-rays/standard-coordinate-systems)
+
+
+# Shading and Light
+- [scratchapixel.com](https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/what-is-shading-light-matter-interaction)
+- Terminology:
+  - ![](https://www.scratchapixel.com/images/upload/shading-intro/shad-mirror.png?)
+  - $P$: Shaded Point
+  - $N$: Normal at P
+  - $L$: Light Direction
+  - $V$: View Direction
+  - Angle of Incidence: Angle between $N$ and $L$
+  - Angle of Reflection: Angle between the reflected Ray and the normal
+  - **Albedo**: Color of an Object (Represented as RGB values)
+    - $Albedo = \frac{reflect\ light}{incident\ light}$
+
+
+## Lights
+### Spherical Light Sources
+- ![](https://www.scratchapixel.com/images/upload/shading-intro/shad-sphericallight.png?)
+- $Light Direction = P-L_P$
+- ![](https://www.scratchapixel.com/images/upload/shading-intro/shad-point-lightsource1.png?)
+- $L_i=\frac{\text{light intensity} \cdot \text{light color}}{4\pi r^2}$
+
+## Shading
+### Diffuse Shading
+- The Point $P$ is viewed as a small area $dA$
+- Depending on the angle between $dA$ and the incoming Light, the intensity of the incoming Light varies
+- ![](https://www.scratchapixel.com/images/upload/shading-intro/shad-light-beam4.png?)
+- ![](https://www.scratchapixel.com/images/upload/shading-intro/shad-light-beam3.png?)
+- (Dot-Product of $N$ and $L$)
+- Formula for the color:
+  - $\text{Diffuse Surface Color} = \frac{\rho_d}{\pi} \cdot L_i \cdot \cos(\theta)$
+    - $L_i = \text{Incident Light Energy}$
+    - $\rho_d = \text{albedo}$
+

@@ -1,7 +1,7 @@
 import unittest
 from raytracer.materials import WHITE, WHITE_LIGHTSOURCE
 from raytracer.coordinate_utils import CAMERA_SCREEN_DIR1, CAMERA_SCREEN_DIR2
-from raytracer.materials import Material
+from raytracer.materials import LightInformation
 from raytracer.coordinate_utils import ZERO
 from raytracer.objects import Plane, Sphere
 from raytracer.coordinate_utils import Ray

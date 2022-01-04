@@ -1,11 +1,13 @@
 from numpy import float64, linalg
-from numpy.lib.function_base import rot90
-from raytracer.coordinate_utils import normalise, Ray
-from raytracer.materials import Material, SHADOW_MATERIAL
+from .light_sources import LightSource, PointLight
+from .coordinate_utils import normalise, Ray
+
+from .light_utils import BLACK
 
 from math import inf
-from typing import List
+from typing import List, Optional, Tuple
 import numpy as np
+
 
 
 """
@@ -15,14 +17,14 @@ The Classes representing the Objects in the 3D Space
 def sign(x):
     return -1 if x < 0 else 1
 class Object:
-    material: Material
+    albedo: Tuple[int, int, int]
     offset: np.ndarray
-    is_source: bool
+    source_object: Optional[LightSource]
 
-    def __init__(self, material: Material, offset: List[np.float64]) -> None:
-        self.material = material
+    def __init__(self, albedo: Tuple[int, int, int], offset: List[np.float64]) -> None:
+        self.albedo = albedo
         self.offset = np.array(offset, dtype=np.float64)
-        self.is_source = (material.illumination > 0)
+        self.source_object = None
     
     def get_intersection_params(self, ray: Ray):
         pass
@@ -34,8 +36,8 @@ class Plane(Object):
     normal: np.ndarray
 
     def __init__(self, vec1: List[np.float64], vec2: List[np.float64], offset: np.ndarray, 
-        material: Material) -> None:
-        super().__init__(material, offset)
+        albedo: Tuple[int, int, int]) -> None:
+        super().__init__(albedo, offset)
         self.normal = normalise(np.array(np.cross(vec1, vec2), dtype=np.float64))
 
     def get_intersection_params(self, ray: Ray) -> List[np.float64]:
@@ -53,8 +55,8 @@ class Plane(Object):
 class Sphere(Object):
     radius: np.float64
     
-    def __init__(self, radius: np.float64, material: Material, offset: List[np.float64]) -> None:
-        super().__init__(material, offset)
+    def __init__(self, radius: np.float64, albedo: Tuple[int, int, int], offset: List[np.float64]) -> None:
+        super().__init__(albedo, offset)
         self.radius = radius
 
     def get_intersection_params(self, ray: Ray):
@@ -74,12 +76,12 @@ class Sphere(Object):
     
     def get_normal(self, point: np.ndarray):
         return normalise(point - self.offset)
-            
-class LightSphere(Sphere):
-    
-    def __init__(self, radius: np.float64, rgb_color: List[np.int8], offset: List[np.float64]) -> None:
-        super().__init__(radius, Material(rgb_color, 100), offset)
 
+
+class LightSphere(Sphere):
+    def __init__(self, radius: np.float64, albedo: Tuple[int, int, int], offset: List[np.float64], intensity: int) -> None:
+        super().__init__(radius, albedo, offset)
+        self.source_object = PointLight(albedo, offset, intensity)
 
 class CuboidVertical(Object):
     """
@@ -95,31 +97,37 @@ class CuboidVertical(Object):
     y_z_surfaces: List[Plane]
     # Rotation Matrix
     rotation_matrix: np.ndarray
+    rotation_matrix_inverse: np.ndarray
 
-    def __init__(self, rotation: float, width:float, height: float, depth: float, material: Material, offset_center: List[np.float64]) -> None:
-        super().__init__(material, offset_center)
+    def __init__(self, rotation: float, width:float, height: float, depth: float, albedo: Tuple[int, int, int], offset_center: List[np.float64]) -> None:
+        super().__init__(albedo, offset_center)
         self.height_half = height / 2
         self.width_half = width / 2
         self.depth_half = depth / 2
         radius = np.linalg.norm([self.width_half, self.height_half, self.depth_half])
-        self.bounding_sphere = Sphere(radius, SHADOW_MATERIAL, offset_center)
+        self.bounding_sphere = Sphere(radius, BLACK, offset_center)
         self.x_y_surfaces = list([
-            Plane([width, 0, 0], [0, height, 0], np.add(offset_center, [0,0, -self.depth_half]), SHADOW_MATERIAL),
-            Plane([width, 0, 0], [0, height, 0], np.add(offset_center, [0,0, self.depth_half]), SHADOW_MATERIAL)
+            Plane([width, 0, 0], [0, height, 0], np.add(offset_center, [0,0, -self.depth_half]), BLACK),
+            Plane([width, 0, 0], [0, height, 0], np.add(offset_center, [0,0, self.depth_half]), BLACK)
         ])
         self.x_z_surfaces = list([
-            Plane([width, 0, 0], [0, 0, depth], np.add(offset_center, [0, -self.height_half, 0]), SHADOW_MATERIAL),
-            Plane([width, 0, 0], [0, 0, depth], np.add(offset_center, [0, self.height_half, 0]), SHADOW_MATERIAL)
+            Plane([width, 0, 0], [0, 0, depth], np.add(offset_center, [0, -self.height_half, 0]), BLACK),
+            Plane([width, 0, 0], [0, 0, depth], np.add(offset_center, [0, self.height_half, 0]), BLACK)
         ])
         self.y_z_surfaces = list([
-            Plane([0, height, 0], [0, 0, depth], np.add(offset_center, [-self.width_half, 0, 0]), SHADOW_MATERIAL),
-            Plane([0, height, 0], [0, 0, depth], np.add(offset_center, [self.width_half, 0, 0]), SHADOW_MATERIAL)
+            Plane([0, height, 0], [0, 0, depth], np.add(offset_center, [-self.width_half, 0, 0]), BLACK),
+            Plane([0, height, 0], [0, 0, depth], np.add(offset_center, [self.width_half, 0, 0]), BLACK)
         ])
         rot_rad = np.deg2rad(rotation)
         self.rotation_matrix = np.array([
             [np.cos(rot_rad), 0, -np.sin(rot_rad)],
             [0, 1, 0],
             [np.sin(rot_rad), 0, np.cos(rot_rad)]
+        ])
+        self.rotation_matrix_inverse = np.array([
+            [np.cos(-rot_rad), 0, -np.sin(-rot_rad)],
+            [0, 1, 0],
+            [np.sin(-rot_rad), 0, np.cos(-rot_rad)]
         ])
 
     def get_intersection_params(self, ray: Ray):
@@ -155,17 +163,17 @@ class CuboidVertical(Object):
         return []
     
     def get_normal(self, point: np.ndarray):
-        x, y, z = point - self.offset
-        if x == 0:
-            return self.rotation_matrix * [-1, 0, 0]
-        if x == self.width_half:
-            return self.rotation_matrix * [1, 0, 0]
-        if y == 0:
-            return self.rotation_matrix * [0, -1, 0]
-        if y == self.height_half:
-            return self.rotation_matrix * [0, 1, 0]
-        if z == 0:
-            return self.rotation_matrix * [0, 0, -1]
-        if z == self.depth_half:
-            return self.rotation_matrix * [0, 0, 1]
+        x, y, z = np.dot(self.rotation_matrix_inverse, (point - self.offset))
+        if x >= (-self.width_half - 1e-6) and x <= (-self.width_half + 1e-6):
+            return np.dot(self.rotation_matrix_inverse, [-1, 0, 0])
+        if x >= (self.width_half - 1e-6) and x <= (self.width_half + 1e-6):
+            return np.dot(self.rotation_matrix_inverse, [1, 0, 0])
+        if y >= (-self.height_half - 1e-6) and y <= (-self.height_half + 1e-6):
+            return np.dot(self.rotation_matrix_inverse, [0, -1, 0])
+        if y >= (self.height_half - 1e-6) and y <= (self.height_half + 1e-6):
+            return np.dot(self.rotation_matrix_inverse, [0, 1, 0])
+        if z >= (-self.depth_half - 1e-6) and z <= (-self.depth_half + 1e-6):
+            return np.dot(self.rotation_matrix_inverse, [0, 0, -1])
+        if z >= (self.depth_half - 1e-6) and z <= (self.depth_half + 1e-6):
+            return np.dot(self.rotation_matrix_inverse, [0, 0, 1])
             

@@ -1,15 +1,18 @@
-from raytracer.camera import SimpleCamera
-from raytracer.coordinate_utils import *
-from raytracer.materials import *
-from raytracer.objects import *
+from numpy.lib.utils import source
+from .light_sources import LightSource
+from .camera import SimpleCamera
+from .coordinate_utils import *
+from .light_sources import *
+from .light_utils import *
+from .objects import *
 
 from math import inf
 class Scenery:
     objects: List[Object]
+    source: LightSource
     camera: SimpleCamera
-    light_degradation: np.float16
     max_depth: int
-    source: LightSphere
+    source: LightSource
 
     def __init__(self, objects: List[Object], camera: SimpleCamera, max_depth: int, light_degradation: np.float16) -> None:
         """
@@ -18,10 +21,9 @@ class Scenery:
         self.objects = objects
         self.camera = camera
         self.max_depth = max_depth
-        self.light_degradation = light_degradation
         for object in objects:
-            if object.is_source:
-                self.source = object
+            if object.source_object is not None:
+                self.source = object.source_object
                 break
     
     def set_camera(self, camera: SimpleCamera):
@@ -33,7 +35,7 @@ class Scenery:
         [x,y,n,percent] = [0,0,0,0]
         n_nxt_percent = self.camera.width * self.camera.height / 100
         for ray in self.camera.get_primary_rays():
-            data[y][x] = self.trace_ray(ray).to_rgb_array()
+            data[y][x] = self.trace_ray(ray)
             x = (x + 1) % self.camera.width
             if x == 0:
                 y = (y + 1) % self.camera.height
@@ -45,9 +47,9 @@ class Scenery:
         return data
 
     
-    def trace_ray(self, ray: Ray, depth: int = 0) -> Material:
+    def trace_ray(self, ray: Ray, depth: int = 0) -> Tuple[int, int, int]:
         if depth > self.max_depth:
-            return SHADOW_MATERIAL
+            return BLACK
 
         # determine closest intersect point (and object)
         [closest_param, closest_obj] = [inf , None]
@@ -60,21 +62,21 @@ class Scenery:
         
         # determine how to proceed
         if closest_obj is None:
-            return SHADOW_MATERIAL
+            return BLACK
 
         # compute distance and intersect Point
         intersect_point = ray.offset + (ray.direction * closest_param)
         distance = closest_param # travels 1 unit per param (since ray.direction is normalised)
         
-        if closest_obj.is_source:
+        if closest_obj.source_object is not None:
             # let the light from the source travel the distance and return it
-            return closest_obj.material.travel(distance, self.light_degradation)
+            return closest_obj.source_object.get_light_intensity(ray.offset)
         else:
             # continue tracing ray recursively and interpolate the returned light information with the one 
             # of the closest object, then let the light travel the distance to the start point
             dir = (self.source.offset - intersect_point)
                 # TODO: catch that ray might be behind object when object is between viewer and source
-            mat = self.trace_ray(Ray(intersect_point, dir), depth + 1)
-            return closest_obj.material.interpolate(mat).travel(distance, self.light_degradation)
+            light_intensity = self.trace_ray(Ray(intersect_point, dir), depth + 1)
+            return get_diffuse_surface_color(closest_obj.albedo, light_intensity, normalise(closest_obj.get_normal(intersect_point)), normalise(dir))
 
 
