@@ -78,11 +78,7 @@ $\begin{array}{l}
 #### 2.1.3 Rechteckiges Bild
 Aber die wenigsten Bildformate sind quadratisch, deswegen müssen auch rechteckige Formate berücksichtigt werden.
 
-![](imgs/camratio.png)
-
-*Quelle: https://www.scratchapixel.com/images/upload/ray-tracing-camera/camratio.png?*
-
-Wie das Bild zeigt, sind die Pixel nicht mehr Quadratisch, wenn gilt $ImageWidth \neq ImageHeight$. Dementsprechend muss das Seitenverhältnis ("Image Aspect Ratio") beachtet werden. Dies wird gelöst, indem die Spannweite der Bildebene auf der x-Achse angepasst wird. Damit werden die Koordinaten in den sogenannten "Camera Space" gebracht.
+Wenn gilt $ImageWidth \neq ImageHeight$ sind die einzelnen Pixel nicht mehr quadratisch,weswegen das Seitenverhältnis ("Image Aspect Ratio") beachtet werden muss. Dies wird gelöst, indem die Spannweite der Bildebene auf der x-Achse angepasst wird. Damit werden die Koordinaten in den sogenannten "Camera Space" gebracht.
 
 Damit ergeben sich folgende Formeln:
 
@@ -96,8 +92,6 @@ PixelCamera_y = (1-2*PixelScreen_y) \\
 Zusätzlich soll es noch die Möglichkeit geben, das Field of View einzustellen, d.h. wie groß der Winkel des sichtbaren Bereichs ist. Besser verständlich anhand des folgenden Bilds:
 
 ![](imgs/fov.png)
-
-*Quelle: https://www.scratchapixel.com/images/upload/ray-tracing-camera/camprofile.png?*
 
 Je größer hier $\alpha$ (also das Field of View) wird, desto mehr ist von der einzufangenen Szene sichtbar. Diese Einstellung funktioniert also ähnlich wie ein Zoom, mit dem näher an die Szene herangezoomt oder weiter hinausgezoomt werden kann.
 
@@ -150,9 +144,9 @@ Die Normale an einem Schnittpunkt kann ganz einfach durch: $\vec{n} = ||P_{hit} 
 
 #### 2.2.2 Ebene
 
-![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/plane.png?)
+![](imgs/plane.png)
 
-*Quelle: https://www.scratchapixel.com/images/upload/ray-simple-shapes/plane.png?*
+*Quelle: https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Plane_equation_qtl1.svg/2880px-Plane_equation_qtl1.svg.png*
 
 Eine Ebene hat die implizite Darstellung: $(p-p_0) \cdot \vec{n} = 0$.
 
@@ -222,8 +216,6 @@ Bei diffusen Oberflächen hat der Eintreffwinkel des Lichtstrahls eine Einwirkun
 
 ![](imgs/shad-light-beam4.png)
 
-*Quelle: https://www.scratchapixel.com/images/upload/shading-intro/shad-light-beam4.png?*
-
 Die korrekte Berechnung für die Farbe der Oberfläche sieht dann wie folgt aus:
 
 $\text{Diffuse Surface Color} = \frac{\rho_d}{\pi} \cdot L_i \cdot \cos(\theta)$
@@ -232,8 +224,6 @@ $\text{Diffuse Surface Color} = \frac{\rho_d}{\pi} \cdot L_i \cdot \cos(\theta)$
   - $\cos(\theta) = N \cdot L$ (vgl. Abbildung)
 
 ![](imgs/shad-light-beam3.png)
-
-*Quelle: https://www.scratchapixel.com/images/upload/shading-intro/shad-light-beam3.png?*
 
 #### 2.3.2 Lichtquellen
 Bei den verwendeten Lichtquellen handelt es sich um Punktlichtquellen, d.h. sie strahlen Licht in alle Richtungen aus. Dies hat zur Folge, dass die Stärke des abgestrahlten Lichts mit einer höheren Distanz zur Lichtquelle abnimmt, da gleich viel Lichtenergie auf eine immer größer werdende Fläche verteilt wird. 
@@ -285,5 +275,5 @@ Somit wird der in der Theorie beschriebene Ray-Tracing Algorithmus implementiert
 
 ### 3.5 Utils
 
-Außerdem wurden noch zahlreiche zusätzliche Hilfsfunktionen implementiert, welche z.B. den Umgang mit Koordinaten vereinfachen.s
+Außerdem wurden noch zahlreiche zusätzliche Hilfsfunktionen implementiert, welche z.B. den Umgang mit Koordinaten vereinfachen.
 
