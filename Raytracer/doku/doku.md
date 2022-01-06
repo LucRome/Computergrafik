@@ -215,8 +215,32 @@ Da hier aber sehr viele Operationen notwendig sind, um zu prüfen, ob ein Ray au
 
 Wird nun erst überprüft, ob ein Ray die Bounding Sphere trifft, bevor die konkreten Berechnungen für den Quader getroffen werden, kann die Laufzeit für Rays die den Quader nicht treffen verbessert werden, da die Berechnungen für eine Kugel um einiges kürzer sind.
 
+## 2.3 Korrektes Shading und Lichtquellen
 
+### 2.3.1 Shading
+Bei diffusen Oberflächen hat der Eintreffwinkel des Lichtstrahls eine Einwirkung darauf, wie stark der jeweilige Punkt beleuchtet ist. Um dies zu Verdeutlichen wird der Lichtstrahl als Zylinder betrachtet und der Auftreffpunkt als Fläche (vgl. Bild). Trifft der Lichtstrahl im Winkel von 90° auf die Fläche, trifft die komplette Energie des Lichtstrahls auf die Fläche und beleuchtet sie entsprechend stark. Schrumpft der Winkel zwischen Lichtstrahl und Auftrefffläche, trifft immer weniger Energie des Lichtstrahls auf die betrachtete Fläche, sie wird immer schwächer beleuchtet. Ist der Lichtstrahl komplett parallel zu der Auftrefffläche, wird sie gar nicht mehr beleuchtet.
 
+![](imgs/shad-light-beam4.png)
 
+*Quelle: https://www.scratchapixel.com/images/upload/shading-intro/shad-light-beam4.png?*
+
+Die korrekte Berechnung für die Farbe der Oberfläche sieht dann wie folgt aus:
+
+$\text{Diffuse Surface Color} = \frac{\rho_d}{\pi} \cdot L_i \cdot \cos(\theta)$
+  - $L_i = \text{Incident Light Energy}$ (Ankommendes Licht, z.B. in RGB-Werten)
+  - $\rho_d = \text{albedo}$ (Farbe der Oberfläche, z.B. in RGB-Werten)
+  - $\cos(\theta) = N \cdot L$ (vgl. Abbildung)
+
+![](imgs/shad-light-beam3.png)
+
+*Quelle: https://www.scratchapixel.com/images/upload/shading-intro/shad-light-beam3.png?*
+
+### 2.3.2 Lichtquellen
+Bei den verwendeten Lichtquellen handelt es sich um Punktlichtquellen, d.h. sie strahlen Licht in alle Richtungen aus. Dies hat zur Folge, dass die Stärke des abgestrahlten Lichts mit einer höheren Distanz zur Lichtquelle abnimmt, da gleich viel Lichtenergie auf eine immer größer werdende Fläche verteilt wird. 
+
+Die Formel zur korrekten Berechnung der Lichtstäre, abhängig von der Distanz ($r$) lautet: $L_i = \frac{\text{light intensity} \cdot \text{light color}}{4 \pi r^2}$
+- $L_i$: Lichtenergie an der Distanz
+- light intensity: Stärke der Lichtquelle (Skalar)
+- light color: Farbe der Lichtquelle (z.B. in RGB-Werten)
 
 
