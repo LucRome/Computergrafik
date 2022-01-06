@@ -118,14 +118,14 @@ Der Primary Ray kann dann sehr einfach berechnet werden, indem $\begin{bmatrix} 
 Es gilt also:
 $Ray = t \cdot \vec{p} = t \cdot \begin{bmatrix} PixelCamera_x \\ PixelCamera_y \\ -1 \end{bmatrix}$
 
-## 2.2 Berechnen der Schnittpunkte von Rays mit Objekten
+### 2.2 Berechnen der Schnittpunkte von Rays mit Objekten
 Eine der Hauptaufgaben des Raytracing-Algorithmus ist es, die Schnittpunkte von Geraden mit Objekten zu berechnen. Außerdem müssen die Normalen der Oberflächen an den Schnittpunkten berechnet werden. Die Grundlagen und Berechnungen hierfür sollen in diesem Abschnitt vermittelt werden.
 
 Normale Raytracer unterstützen meist nur eine Art von Objekt (meist Dreiecke) und wandeln alle anderen Objekte in diese um, da für diese Aufgabe aber nur wenige simple Objekttypen unterstützt werden müssen, werden diese alle einzeln implementiert.
 
 Da die Gerade immer nach dem Muster $G = \vec{o} + t \cdot \vec{d}$ aufgebaut ist, genügt es den Parameter $t$ zu berechnen, da sich daraus sehr einfach der Schnittpunkt berechnen lässt.
 
-### 2.2.1 Kugeln
+#### 2.2.1 Kugeln
 Bei Kugeln können die Schnittpunkte sehr einfach Analytisch berechnet werden. 
 
 Eine Kugel kann implizit durch $x^2+y^2+z^2 = R^2$ angegeben werden. Ein Punkt $P$ mit $P^2 - R^2 = 0$ beschreibt dabei einen Punkt auf der Oberfläche der Kugel. Um hiermit auf den Schnittpunkt zu kommen muss die Geradengleichung in diese Gleichung eingesetzt werden. Es ergibt sich: $|\vec{o} + t\vec{d}|^2 - R^2 = 0$. 
@@ -148,7 +148,7 @@ Basierend auf $t_1$ und $t_2$ können dann die tatsächlichen Punkte berechnet w
 
 Die Normale an einem Schnittpunkt kann ganz einfach durch: $\vec{n} = ||P_{hit} - C||$ berechnet werden.
 
-### 2.2.2 Ebene
+#### 2.2.2 Ebene
 
 ![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/plane.png?)
 
@@ -162,7 +162,7 @@ Setzt man nun die Gleichung der Gerade in die Gleichung der Ebene ein erhält ma
 
 Die Normale ist für die komplette Ebene gleich und muss somit nicht extra berechnet werden.
 
-### 2.2.3 Quader
+#### 2.2.3 Quader
 Die Berechnung eines Schnittpunktes zwischen einem Quader und einer Geraden ist hingegen relativ kompliziert. Es gibt auch keine simple analytische Lösung, da sich die Oberfläche eines Quaders nicht ohne weiteres implizit definieren lässt.
 
 Aus der Aufgabenstellung lässt sich aber entnehmen, dass sich der Quader nur um die y-Achse rotieren können muss.
@@ -215,9 +215,9 @@ Da hier aber sehr viele Operationen notwendig sind, um zu prüfen, ob ein Ray au
 
 Wird nun erst überprüft, ob ein Ray die Bounding Sphere trifft, bevor die konkreten Berechnungen für den Quader getroffen werden, kann die Laufzeit für Rays die den Quader nicht treffen verbessert werden, da die Berechnungen für eine Kugel um einiges kürzer sind.
 
-## 2.3 Korrektes Shading und Lichtquellen
+### 2.3 Korrektes Shading und Lichtquellen
 
-### 2.3.1 Shading
+#### 2.3.1 Shading
 Bei diffusen Oberflächen hat der Eintreffwinkel des Lichtstrahls eine Einwirkung darauf, wie stark der jeweilige Punkt beleuchtet ist. Um dies zu Verdeutlichen wird der Lichtstrahl als Zylinder betrachtet und der Auftreffpunkt als Fläche (vgl. Bild). Trifft der Lichtstrahl im Winkel von 90° auf die Fläche, trifft die komplette Energie des Lichtstrahls auf die Fläche und beleuchtet sie entsprechend stark. Schrumpft der Winkel zwischen Lichtstrahl und Auftrefffläche, trifft immer weniger Energie des Lichtstrahls auf die betrachtete Fläche, sie wird immer schwächer beleuchtet. Ist der Lichtstrahl komplett parallel zu der Auftrefffläche, wird sie gar nicht mehr beleuchtet.
 
 ![](imgs/shad-light-beam4.png)
@@ -235,7 +235,7 @@ $\text{Diffuse Surface Color} = \frac{\rho_d}{\pi} \cdot L_i \cdot \cos(\theta)$
 
 *Quelle: https://www.scratchapixel.com/images/upload/shading-intro/shad-light-beam3.png?*
 
-### 2.3.2 Lichtquellen
+#### 2.3.2 Lichtquellen
 Bei den verwendeten Lichtquellen handelt es sich um Punktlichtquellen, d.h. sie strahlen Licht in alle Richtungen aus. Dies hat zur Folge, dass die Stärke des abgestrahlten Lichts mit einer höheren Distanz zur Lichtquelle abnimmt, da gleich viel Lichtenergie auf eine immer größer werdende Fläche verteilt wird. 
 
 Die Formel zur korrekten Berechnung der Lichtstäre, abhängig von der Distanz ($r$) lautet: $L_i = \frac{\text{light intensity} \cdot \text{light color}}{4 \pi r^2}$
@@ -243,4 +243,47 @@ Die Formel zur korrekten Berechnung der Lichtstäre, abhängig von der Distanz (
 - light intensity: Stärke der Lichtquelle (Skalar)
 - light color: Farbe der Lichtquelle (z.B. in RGB-Werten)
 
+## 3. Dokumentation des Codes
+
+*Hier werden nur grundlegende Eigenschaften der Implementierung dokumentiert, genauere Eigenschaften werden innerhalb des Codes erläutert.*
+
+### 3.1 Generierung der Primary Rays
+
+Für diese Aufgabe existiert eine Klasse `SimpleCamera` welche die Auflösung, sowie das Field of View bekommt und dann die in Abs. 2.1 beschriebenen Berechnungen ausführt, um die Primary Rays zu Erzeugen. Dies geschiet durch die Funktion `SimpleCamera.generate_primary_rays`. Die Primary Rays werden von dieser Funktion so zurückgegeben, dass mit einer for-each-Schleife über sie iteriert werden kann.
+
+Für Rays existiert eine Klasse `Ray`, welche über ein Attribut für die Position (`offset`) und ein Attribut für die Richtung (`direction`) besitzt.
+
+### 3.2 Objekte
+
+Um Objekte zu repräsentieren existiert die abstrakte Klasse `Object`. Da alle Objekte über eine Farbe und eine Position verfügen, werden diese Attribute in dieser Klasse hinterlegt. Außerdem werden von dieser Klasse 2 Funktionen vorgegeben, mit denen der Parameter $t$ für den Schnittpunkt einer Geraden mit dem Objekt, sowie die Normale der Oberfläche des Objekts an einem Schnittpunkt berechnet werden kann.
+
+Außerdem verfügt diese Klasse noch über ein Attribut `source_object`, in dem ein Objekt für eine Lichtquelle hinterlegt werden kann, falls es sich bei dem Objekt um ein Objekt handelt, welches Licht ausstrahlt.
+
+Von dieser Klasse leiten sich alle Klassen ab, welche tatsächliche Objekttypen implementieren. Implementiert wurden die Objekttypen, welche in Abs. 2.2 beschrieben wurden.
+
+### 3.3 Licht und Lichtquellen
+
+Für Lichtstrahlen existiert die Klasse `Light`, welche über eine Farbe (in RGB), sowie eine Intensität verfügt. Außerdem verfügt diese Klasse über Hilfsfunktionen, mit denen z.B. die Abnahme der Lichtintensität über einen Weg (gemäß dem Modell eines Punktlichts) simuliert werden kann.
+
+Für Lichtquellen existiert die abstrakte Klasse `LightSource`, welche über eine Farbe, eine Intensität, sowie eine Position verfügt, außerdem gibt diese Klasse eine Funktion vor, mit der die Lichtintensität an einem Punkt abseits von der Lichtquelle verwendet werden kann. Von dieser Klasse erbt die Klasse `PointLight`, welche eine Punktlichtquelle implementiert.
+
+### 3.4 Ray-Tracing Algorithmus
+
+Für den Algorithmus existiert die Klasse `Scenery`, diese wird mit einer Liste aller Objekte, einer Kamera sowie einer Lichtquelle instanziiert.
+
+Gestartet wird der Algorithmus durch den Aufruf der Funktion `Scenery.render_img_to_rgb_array`, welche den Algorithmus für alle Pixel des Bildes ausführt und am Ende ein mehrdimensionales Array zurückgibt, dass die RGB-Werte für alle Pixel enthält, aus dem dann sehr einfach ein Bild generiert werden kann, welches z.B. auf der Festplatte gespeichert werden kann. Während dem Rendervorgang wird der aktuelle Status durch Ausgabe der Prozentzahl der fertigen Pixel dargestellt.
+
+Der eigentliche Ray-Tracing Algorithmus verbirgt sich hinter der Funktion `trace_ray`, welche ein Objekt der Klasse `Light` zurückgibt. Dieser Funktion wird ein zu tracender Ray mitgegeben, sowie eine Tiefe, welche die Tiefe der rekursiven Aufrufe dieser Funktion darstellt. Die Funktion gibt ein Objekt der Klasse `Light` zurück, welche die Lichtinformation am Ausgangspunkt des Rays darstellt (d.h. $t = 0$). Ist die Tiefe zu hoch gibt die Funktion direkt ein `Light` Objekt zurück, welche die Farbe Schwarz darstellt.
+
+Um den Strahl zu tracen sucht der Algorithmus zuerst aus der Liste der Objekte das Objekt heraus, auf das der Lichtstrahl zuerst trifft. Trifft der Lichtstrahl auf kein Objekt wird wieder die Farbe Schwarz zurückgegeben. Trifft der Lichtstrahl auf ein Objekt wird zuerst überprüft, ob es sich bei dem Objekt um eine Lichtquelle handelt. 
+
+Falls ja wird berechnet, welche Energie und Farbe das emittierte Licht am Ausgangspunkt des Rays hat und das Ergebnis zurückgegeben.
+
+Trifft der Strahl auf ein Objekt welches keine Lichtquelle ist, wird von dem Auftreffpunkt aus ein Strahl zu der Quelle erzeugt und die Funktion ruft sich mit diesem Strahl rekursiv auf. Basierend auf dem Ergebnis wird dann das von dem Auftreffpunkt emittierte Licht berechnet (wie in Abs. 2.3.2 beschrieben) und es wird simuliert, wie dieses Licht aussieht, nach dem es den Weg bis zum Ausgangspunkt des ersten Strahls zurückgelegt hat. Das Ergebnis wird zurückgegeben.
+
+Somit wird der in der Theorie beschriebene Ray-Tracing Algorithmus implementiert.
+
+### 3.5 Utils
+
+Außerdem wurden noch zahlreiche zusätzliche Hilfsfunktionen implementiert, welche z.B. den Umgang mit Koordinaten vereinfachen.s
 
