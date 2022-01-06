@@ -51,7 +51,7 @@ Da viel mit Vekroren gearbeitet wird, werden hierzu ein paar Grundlagen bereitge
 #### 1.2.2 Rotationsmatrizen
 Soll ein Vektor um eine Achse um den Winkel $\theta$ rotiert werden, können dafür Rotationsmatrizen eingesetzt werden. Die Matrix um einen Vektor um die y-Achse rotiert werden lautet die Matrix:
 
-$R_z(\theta)= \begin{bmatrix} \cos(\theta) & \sin(\theta) & 0 \\ -\sin(\theta) & \cos(\theta) & 0 \\ 0 & 0 & 1 \\ \end{bmatrix}$
+$R_y(\theta)= \begin{bmatrix} \cos(\theta) & 0 & -\sin(\theta) \\ 0 & 1 &  0 \\ \sin(\theta) & 0 & \cos(\theta) \\ \end{bmatrix}$
 
 ## 2. Anwendung der Theorie
 In diesem Abschnitt soll beschrieben werden, wie die in der Theorie gestellten Anforderungen umgesetzt werden können, ohne dabei auf die genaue Implementierung in Python einzugehen.
@@ -117,5 +117,106 @@ $P = \begin{bmatrix} PixelCamera_x \\ PixelCamera_y \\ -1 \end{bmatrix}$
 Der Primary Ray kann dann sehr einfach berechnet werden, indem $\begin{bmatrix} 0 & 0 & 0 \end{bmatrix}$ als Ortsvektor (Offset) und der berechnete Punkt $P$ als Richtungsvektor (direction) verwendet wird.
 Es gilt also:
 $Ray = t \cdot \vec{p} = t \cdot \begin{bmatrix} PixelCamera_x \\ PixelCamera_y \\ -1 \end{bmatrix}$
+
+## 2.2 Berechnen der Schnittpunkte von Rays mit Objekten
+Eine der Hauptaufgaben des Raytracing-Algorithmus ist es, die Schnittpunkte von Geraden mit Objekten zu berechnen. Außerdem müssen die Normalen der Oberflächen an den Schnittpunkten berechnet werden. Die Grundlagen und Berechnungen hierfür sollen in diesem Abschnitt vermittelt werden.
+
+Normale Raytracer unterstützen meist nur eine Art von Objekt (meist Dreiecke) und wandeln alle anderen Objekte in diese um, da für diese Aufgabe aber nur wenige simple Objekttypen unterstützt werden müssen, werden diese alle einzeln implementiert.
+
+Da die Gerade immer nach dem Muster $G = \vec{o} + t \cdot \vec{d}$ aufgebaut ist, genügt es den Parameter $t$ zu berechnen, da sich daraus sehr einfach der Schnittpunkt berechnen lässt.
+
+### 2.2.1 Kugeln
+Bei Kugeln können die Schnittpunkte sehr einfach Analytisch berechnet werden. 
+
+Eine Kugel kann implizit durch $x^2+y^2+z^2 = R^2$ angegeben werden. Ein Punkt $P$ mit $P^2 - R^2 = 0$ beschreibt dabei einen Punkt auf der Oberfläche der Kugel. Um hiermit auf den Schnittpunkt zu kommen muss die Geradengleichung in diese Gleichung eingesetzt werden. Es ergibt sich: $|\vec{o} + t\vec{d}|^2 - R^2 = 0$. 
+
+Dies gilt aber nur für eine Kugel deren Zentrum auf $\begin{bmatrix}0 & 0 & 0\end{bmatrix}$ liegt. Für eine Kugel mit dem Zentrum $C$ lässt sich die Formel wie folgt umschreiben:
+
+$|P-C|^2 - R^2 = 0 \Rightarrow |\vec{o} + t\vec{d} - C|^2 - R^2 = 0$
+
+Diese Gleichung lässt sich auf die Form $f(x) = ax^2 + bx + c$ bringen und mit der Mitternachtsformel auflösen. Da Computer aber nur über eine begrenzte Genauigkeit verfügen, wird folgende Formel verwendet:
+
+$\begin{array}{l} a = \vec{d}^2,\ b = 2\vec{o}\vec{d},\ c = \vec{o}^2-R^2 \\ q = -\frac{1}{2}(b+sign(b)\sqrt{b^2-4ac}) \\ t_1 = q/a \\ t_2 = c/q \end{array}$
+
+mit $sign(x) = \left\{\begin{array}{l} -1 & wenn & b < 0 \\ 1 & sonst \end{array} \right.$
+
+hierbei kann die Determinante $\Delta = b^2-4ac$ zur Überprüfung verwendet werden, ob und wenn ja, wie viele Schnittpunkte existieren:
+
+$\begin{array}{l} \Delta > 0 \rightarrow \text{ 2 Schnittpunkte} \\ \Delta = 0 \rightarrow \text{ 1 Schnittpunkt} \\ \Delta < 0 \rightarrow \text{ 0 Schnittpunkte} \end{array}$
+
+Basierend auf $t_1$ und $t_2$ können dann die tatsächlichen Punkte berechnet werden. 
+
+Die Normale an einem Schnittpunkt kann ganz einfach durch: $\vec{n} = ||P_{hit} - C||$ berechnet werden.
+
+### 2.2.2 Ebene
+
+![](https://www.scratchapixel.com/images/upload/ray-simple-shapes/plane.png?)
+
+*Quelle: https://www.scratchapixel.com/images/upload/ray-simple-shapes/plane.png?*
+
+Eine Ebene hat die implizite Darstellung: $(p-p_0) \cdot \vec{n} = 0$.
+
+Die Gerade ist hier dargestellt als: $l_0 + t \cdot l = p$ ($l_0$: Offset, $l$: Direction)
+
+Setzt man nun die Gleichung der Gerade in die Gleichung der Ebene ein erhält man für den Parameter t: $t = \frac{(p_0-l_0) \cdot n}{l \cdot n}$. Näherungsweise kann hier festgelegt werden, dass wenn $l \cdot n < 1e-6$ gilt, die Gerade und die Ebene nahezu parallel sind, es also keinen Schnittpunkt gibt.
+
+Die Normale ist für die komplette Ebene gleich und muss somit nicht extra berechnet werden.
+
+### 2.2.3 Quader
+Die Berechnung eines Schnittpunktes zwischen einem Quader und einer Geraden ist hingegen relativ kompliziert. Es gibt auch keine simple analytische Lösung, da sich die Oberfläche eines Quaders nicht ohne weiteres implizit definieren lässt.
+
+Aus der Aufgabenstellung lässt sich aber entnehmen, dass sich der Quader nur um die y-Achse rotieren können muss.
+
+Die Anforderungen wurden demnach wie folgt gelöst:
+
+Die Box verfügt über:
+- $w$: Breite (Width, entlang der x-Achse)
+- $h$: Höhe (Height, entlang der y-Achse)
+- $d$: Tiefe (Depth, entlang der z-Achse)
+- $\vec{o}$: Position (Offset, im World Space)
+
+Zuerst wird ein eigenes Koordinatensystem definiert, dessen Zentrum in dem Mittelpunkt des Quaders liegt (hier "Box Space").
+
+![](imgs/Box_Koordinatensystem.png)
+
+Eine Gerade $(G=\vec{o_g}+t\vec{d_g})$ aus dem World Space lässt sich wie folgt in den Box Space übertragen:
+
+$\begin{array}{l} \vec{o_g}' = \vec{o_g} - \vec{o} \\ G' = \vec{o_g}' + t \vec{d_g} \end{array}$ 
+
+Für die Seiten des Quaders werden jeweils Ebenen definiert, welche in dem Box Space wie folgt liegen:
+
+|parallel zu | Offset |
+|---|---|
+|YZ-Ebene| $x = \pm w/2$|
+|XZ-Ebene| $y = \pm h/2$|
+|XY-Ebene| $z = \pm d/2$|
+
+Dann kann der Schnittpunkt zwischen $G'$ und den Ebenen wie bereits beschrieben, berechnet werden. Dieser muss am Ende nur aus dem Box Space in den World Space übertragen werden über: $P_{world} = P_{box} + \vec{o}$.
+
+Die Normale zu einem Punkt auf der Oberfläche des Quaders kann ermittelt werden, in dem ermittelt wird, auf welcher Ebene der Auftreffpunkt liegt und dann die Normale dieser Ebene genommen wird.
+
+Damit lassen sich bisher jedoch nur Quader abbilden, welche nicht um die y-Achse rotiert sind. Die Rotation um die y-Achse (um den Winkel $\theta$) wird wie folgt implementiert:
+
+Zuerst werden die Rotationsmatrizen ermittelt:
+
+$R_y= \begin{bmatrix} \cos(\theta) & 0 & -\sin(\theta) \\ 0 & 1 &  0 \\ \sin(\theta) & 0 & \cos(\theta) \\ \end{bmatrix},\ R_{y,neg} = \begin{bmatrix} \cos(-\theta) & 0 & -\sin(-\theta) \\ 0 & 1 &  0 \\ \sin(.\theta) & 0 & \cos(-\theta) \\ \end{bmatrix}$
+
+Dann müssen lediglich die Berechnung der Geraden im Box Space, sowie die Berechnung der Normalen modifiziert werden.
+
+Die neue Gerade im Box Space wird berechnet durch:
+
+$\begin{array}{l} \vec{o_g}' = R_y \cdot (\vec{o_g} - \vec{o}) \\ G' = \vec{o_g}' + t \vec{d_g} \end{array}$
+
+Und die unrotierte Normale $\vec{n}$ welche für einen unrotierten Quader gelten würde, wird rotiert durch $\vec{n}' = R_{y,neg} \cdot \vec{n}$ von dem Box Space (in dem der Quader nicht rotiert ist) wieder in den World Space gebracht.
+
+Da hier aber sehr viele Operationen notwendig sind, um zu prüfen, ob ein Ray auf den Quader trifft, kann eine sogenannte Bounding Sphere ergänzt werden, d.h. eine Kugel, welche die Box komplett einschließt (vgl. Bild).
+
+![](imgs/Bounding_Sphere_2D.png)
+
+Wird nun erst überprüft, ob ein Ray die Bounding Sphere trifft, bevor die konkreten Berechnungen für den Quader getroffen werden, kann die Laufzeit für Rays die den Quader nicht treffen verbessert werden, da die Berechnungen für eine Kugel um einiges kürzer sind.
+
+
+
+
 
 
