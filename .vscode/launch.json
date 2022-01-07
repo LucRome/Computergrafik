@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Main",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Raytracer/src/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/Raytracer/src",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/Raytracer/src"
+            }
+        },
+        {
+            "name": "Python: Unittests",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Raytracer/src/test/run_all.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/Raytracer/src",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/Raytracer/src"
+            }
+        }
+    ]
+}

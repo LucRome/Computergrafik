@@ -1,0 +1,49 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Python: run Main",
+        "type": "shell",
+        "command": "${workspaceFolder}/Raytracer/src/.venv/Scripts/python.exe",
+        "args": ["${workspaceFolder}/Raytracer/src/main.py"],
+        // TODO: correct?
+        "problemMatcher": {
+            "fileLocation": ["relative", "${workspaceRoot}"],
+            "pattern": {
+                "regexp": "^(.*)s$",
+                "message": 1
+            }
+        },
+        "options": {
+          "cwd": "${workspaceFolder}/Raytracer/src",
+          "env": {
+            "PYTHONPATH": "${workspaceFolder}/Raytracer/src; ${workspace}"
+          }
+        }
+      },
+      {
+        "label": "Python: run Unittests",
+        "type": "shell",
+        "command": "${workspaceFolder}/Raytracer/src/.venv/Scripts/python.exe",
+        "args": [
+          "${workspaceFolder}/Raytracer/src/test/run_all.py"
+        ],
+        "options": {
+          "cwd": "${workspaceFolder}/Raytracer/src/",
+          "env": {
+            "PYTHONPATH": "${workspaceFolder}/Raytracer/src"
+          }
+        },
+        // TODO
+        "problemMatcher": {
+          "fileLocation": ["relative", "${workspaceRoot}"],
+          "pattern": {
+              "regexp": "",
+              "message": 1
+          }
+        }
+      }
+    ]
+  }
