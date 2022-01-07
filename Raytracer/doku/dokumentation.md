@@ -1,4 +1,34 @@
 # Dokumentation Raytracer
+
+## Inhaltsverzeichnis
+- [Dokumentation Raytracer](#dokumentation-raytracer)
+  - [Inhaltsverzeichnis](#inhaltsverzeichnis)
+  - [1. Theorie](#1-theorie)
+    - [1.1 Funktionsweise](#11-funktionsweise)
+    - [1.2 Mathematische Grundlagen](#12-mathematische-grundlagen)
+      - [1.2.1 Vektoren](#121-vektoren)
+      - [1.2.2 Rotationsmatrizen](#122-rotationsmatrizen)
+  - [2. Anwendung der Theorie](#2-anwendung-der-theorie)
+    - [2.1 Erzeugung der Primary Rays](#21-erzeugung-der-primary-rays)
+      - [2.1.1 Konventionen](#211-konventionen)
+      - [2.1.2 Quadratisches Bild](#212-quadratisches-bild)
+      - [2.1.3 Rechteckiges Bild](#213-rechteckiges-bild)
+      - [2.1.4 Field of View](#214-field-of-view)
+      - [2.1.5 Übergang in den World Space:](#215-übergang-in-den-world-space)
+    - [2.2 Berechnen der Schnittpunkte von Rays mit Objekten](#22-berechnen-der-schnittpunkte-von-rays-mit-objekten)
+      - [2.2.1 Kugeln](#221-kugeln)
+      - [2.2.2 Ebene](#222-ebene)
+      - [2.2.3 Quader](#223-quader)
+    - [2.3 Korrektes Shading und Lichtquellen](#23-korrektes-shading-und-lichtquellen)
+      - [2.3.1 Shading](#231-shading)
+      - [2.3.2 Lichtquellen](#232-lichtquellen)
+  - [3. Dokumentation des Codes](#3-dokumentation-des-codes)
+    - [3.1 Generierung der Primary Rays](#31-generierung-der-primary-rays)
+    - [3.2 Objekte](#32-objekte)
+    - [3.3 Licht und Lichtquellen](#33-licht-und-lichtquellen)
+    - [3.4 Ray-Tracing Algorithmus](#34-ray-tracing-algorithmus)
+    - [3.5 Utils](#35-utils)
+
 ## 1. Theorie
 ### 1.1 Funktionsweise
 Zuerst soll die allgemeine Funktionsweise eines Raytracers erläutert werden.
@@ -12,7 +42,7 @@ Außerdem treten noch andere Effekte wie z.B. Absorption gewisser Frequenzen (wo
 
 ![](./imgs/660px-Raytracing.svg.png)
 
-*Quelle: https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Raytracing.svg/660px-Raytracing.svg.png*
+*Abb.1: Strahlenrichtung beim Ray-Tracing, Quelle: https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Raytracing.svg/660px-Raytracing.svg.png*
 
 Wie in dem Bild zu sehen wird also zuerst ein Strahl von dem Auge des Betrachters durch einen Punkt der Bildebene erzeugt ("Primary Ray") und es wird dann betrachtet, wie sich der Strahl verhält. Soll ein Bild mit einer vorgegeben Auflösung erzeugt werden, wird dieser Vorgang für alle Pixel durchgeführt, wobei der Strahl immer durch das Zentrum des Pixels geht.
 
@@ -26,6 +56,8 @@ Außerdem sollen zunächst noch ein paar mathematische Grundlagen bereitgestellt
 *Hinweis: alle Vektoren haben die Form: $\vec{a} = \begin{bmatrix} x \\ y \\ z \end{bmatrix}$ (der einfacheren Lesbarkeit halber werden in der Dokumentation ggf. Zeilenvektoren verwendet) mit folgender Orientierung:*
 
 ![](imgs/Koordinatensystem_orientierung.png)
+
+*Abb. 2: Orientierung des verwendeten Koordinatensystems*
 
 
 #### 1.2.1 Vektoren
@@ -93,6 +125,8 @@ Zusätzlich soll es noch die Möglichkeit geben, das Field of View einzustellen,
 
 ![](imgs/fov.png)
 
+*Abb. 3: Bedeutund des Field of View*
+
 Je größer hier $\alpha$ (also das Field of View) wird, desto mehr ist von der einzufangenen Szene sichtbar. Diese Einstellung funktioniert also ähnlich wie ein Zoom, mit dem näher an die Szene herangezoomt oder weiter hinausgezoomt werden kann.
 
 Mit dieser Einstellung lauten die Formeln für die Camera Space Koordinaten wie folgt:
@@ -146,7 +180,7 @@ Die Normale an einem Schnittpunkt kann ganz einfach durch: $\vec{n} = ||P_{hit} 
 
 ![](imgs/plane.png)
 
-*Quelle: https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Plane_equation_qtl1.svg/2880px-Plane_equation_qtl1.svg.png*
+*Abb. 4: Parameterdarstellung einer Ebene, Quelle: https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Plane_equation_qtl1.svg/2880px-Plane_equation_qtl1.svg.png*
 
 Eine Ebene hat die implizite Darstellung: $(p-p_0) \cdot \vec{n} = 0$.
 
@@ -172,6 +206,8 @@ Die Box verfügt über:
 Zuerst wird ein eigenes Koordinatensystem definiert, dessen Zentrum in dem Mittelpunkt des Quaders liegt (hier "Box Space").
 
 ![](imgs/Box_Koordinatensystem.png)
+
+*Abb. 5: Ort des Koordinatensystems "Box Space" im Verhältnis zur Position des Quaders*
 
 Eine Gerade $(G=\vec{o_g}+t\vec{d_g})$ aus dem World Space lässt sich wie folgt in den Box Space übertragen:
 
@@ -207,6 +243,8 @@ Da hier aber sehr viele Operationen notwendig sind, um zu prüfen, ob ein Ray au
 
 ![](imgs/Bounding_Sphere_2D.png)
 
+*Abb. 6: Bounding Sphere um einen Quader (2D-Darstellung)*
+
 Wird nun erst überprüft, ob ein Ray die Bounding Sphere trifft, bevor die konkreten Berechnungen für den Quader getroffen werden, kann die Laufzeit für Rays die den Quader nicht treffen verbessert werden, da die Berechnungen für eine Kugel um einiges kürzer sind.
 
 ### 2.3 Korrektes Shading und Lichtquellen
@@ -215,6 +253,8 @@ Wird nun erst überprüft, ob ein Ray die Bounding Sphere trifft, bevor die konk
 Bei diffusen Oberflächen hat der Eintreffwinkel des Lichtstrahls eine Einwirkung darauf, wie stark der jeweilige Punkt beleuchtet ist. Um dies zu Verdeutlichen wird der Lichtstrahl als Zylinder betrachtet und der Auftreffpunkt als Fläche (vgl. Bild). Trifft der Lichtstrahl im Winkel von 90° auf die Fläche, trifft die komplette Energie des Lichtstrahls auf die Fläche und beleuchtet sie entsprechend stark. Schrumpft der Winkel zwischen Lichtstrahl und Auftrefffläche, trifft immer weniger Energie des Lichtstrahls auf die betrachtete Fläche, sie wird immer schwächer beleuchtet. Ist der Lichtstrahl komplett parallel zu der Auftrefffläche, wird sie gar nicht mehr beleuchtet.
 
 ![](imgs/shad-light-beam4.png)
+
+*Abb. 7: Darstellung der Beleuchtungsverhältnisse unter verschiedenen Eintreffwinkeln des Lichtstrahls*
 
 Die korrekte Berechnung für die Farbe der Oberfläche sieht dann wie folgt aus:
 
@@ -225,6 +265,8 @@ $\text{Diffuse Surface Color} = \frac{\rho_d}{\pi} \cdot L_i \cdot \cos(\theta)$
 
 ![](imgs/shad-light-beam3.png)
 
+*Abb. 8: Bedeutung von N und L in diesem Kontext*
+
 #### 2.3.2 Lichtquellen
 Bei den verwendeten Lichtquellen handelt es sich um Punktlichtquellen, d.h. sie strahlen Licht in alle Richtungen aus. Dies hat zur Folge, dass die Stärke des abgestrahlten Lichts mit einer höheren Distanz zur Lichtquelle abnimmt, da gleich viel Lichtenergie auf eine immer größer werdende Fläche verteilt wird. 
 
@@ -232,6 +274,8 @@ Die Formel zur korrekten Berechnung der Lichtstäre, abhängig von der Distanz (
 - $L_i$: Lichtenergie an der Distanz
 - light intensity: Stärke der Lichtquelle (Skalar)
 - light color: Farbe der Lichtquelle (z.B. in RGB-Werten)
+
+
 
 ## 3. Dokumentation des Codes
 
@@ -276,4 +320,3 @@ Somit wird der in der Theorie beschriebene Ray-Tracing Algorithmus implementiert
 ### 3.5 Utils
 
 Außerdem wurden noch zahlreiche zusätzliche Hilfsfunktionen implementiert, welche z.B. den Umgang mit Koordinaten vereinfachen.
-
