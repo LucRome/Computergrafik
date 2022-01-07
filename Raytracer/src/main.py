@@ -15,34 +15,30 @@ if not IMG_PATH.exists():
     IMG_PATH.mkdir()
 
 OBJECTS = [
-    # CuboidVertical(
-    #     rotation=45,
-    #     width=4,
-    #     height=6,
-    #     depth=4,
-    #     albedo=RED,
-    #     offset_center=[0, -4, -10]
-    # ),
-    LightSphere(
-        radius=0.5,
-        albedo=WHITE,
-        offset=[-2,0,-5],
-        intensity=10000000
-    ),
-    Sphere(2.0, RED, [0,5,-13]),
-    #Sphere(4.0, BLUE, [3,2,-12]),
-    Plane(vec1=[1,0,0], vec2=[0,1,0], offset=[0,0,-20], albedo=(120,120,120)),
+    # Planes on the sides
+    Plane(vec1=[1,0,0], vec2=[0,0,-1], offset=[0,20,0], albedo=WHITE),
+    Plane(vec1=[1,0,0], vec2=[0,0,-1], offset=[0,-20,0], albedo=WHITE),
+    Plane(vec1=[1,0,0], vec2=[0,1,0], offset=[0,0,-110], albedo=WHITE),
+    Plane(vec1=[0,1,0], vec2=[0,0,1], offset=[25,0,0], albedo=(82, 147, 250)),
+    Plane(vec1=[0,1,0], vec2=[0,0,1], offset=[-25,0,0], albedo=RED),
+    # Vertical Cuboids
+    CuboidVertical(rotation=45, width=12.5, height=40, depth=12.5,
+        albedo=(180, 180, 180), offset_center=[10, -10, -70]),
+    CuboidVertical(rotation=0, width=12.5, height=30, depth=12.5,
+        albedo=(250, 250, 82), offset_center=[-10, -20, -70]),
+    #Light
+    LightSphere(radius=2.5, albedo=WHITE, offset=[0, 19.2, -80], intensity=1000000000000),
 ]
 
 FOV = 60
-MAX_DEPTH = 3
+MAX_DEPTH = 4
 LIGHT_DEGRADATION = 2
 
 """
 Small Image
 """
-camera = SimpleCamera(480,360,FOV)
-scenery = Scenery(OBJECTS, camera, MAX_DEPTH, LIGHT_DEGRADATION)
+camera = SimpleCamera(100,100,FOV)
+scenery = Scenery(OBJECTS, camera, MAX_DEPTH)
 
 test_single_pixel(scenery, pixel_x=227, pixel_y=73)
 save_as_img_timed(IMG_PATH.joinpath('small.png'), scenery)

@@ -4,6 +4,7 @@ from typing import List, Tuple
 
 def get_diffuse_surface_color(albedo: np.ndarray, l_i: 'Light', normal: np.ndarray, light_direction: np.ndarray) -> 'Light':
     rgb = (np.array(albedo) / np.pi) * np.array(l_i.rgb) * max([0, np.dot(normal, light_direction)])
+    # TODO: light intensity auch verrechnen???
     return Light(
         rgb=rgb,
         intensity=l_i.intensity
