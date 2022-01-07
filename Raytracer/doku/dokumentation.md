@@ -28,6 +28,7 @@
     - [3.3 Licht und Lichtquellen](#33-licht-und-lichtquellen)
     - [3.4 Ray-Tracing Algorithmus](#34-ray-tracing-algorithmus)
     - [3.5 Utils](#35-utils)
+    - [3.6 Main-Funktion](#36-main-funktion)
 
 ## 1. Theorie
 ### 1.1 Funktionsweise
@@ -307,7 +308,7 @@ Für den Algorithmus existiert die Klasse `Scenery`, diese wird mit einer Liste 
 
 Gestartet wird der Algorithmus durch den Aufruf der Funktion `Scenery.render_img_to_rgb_array`, welche den Algorithmus für alle Pixel des Bildes ausführt und am Ende ein mehrdimensionales Array zurückgibt, dass die RGB-Werte für alle Pixel enthält, aus dem dann sehr einfach ein Bild generiert werden kann, welches z.B. auf der Festplatte gespeichert werden kann. Während dem Rendervorgang wird der aktuelle Status durch Ausgabe der Prozentzahl der fertigen Pixel dargestellt.
 
-Der eigentliche Ray-Tracing Algorithmus verbirgt sich hinter der Funktion `trace_ray`, welche ein Objekt der Klasse `Light` zurückgibt. Dieser Funktion wird ein zu tracender Ray mitgegeben, sowie eine Tiefe, welche die Tiefe der rekursiven Aufrufe dieser Funktion darstellt. Die Funktion gibt ein Objekt der Klasse `Light` zurück, welche die Lichtinformation am Ausgangspunkt des Rays darstellt (d.h. $t = 0$). Ist die Tiefe zu hoch gibt die Funktion direkt ein `Light` Objekt zurück, welche die Farbe Schwarz darstellt.
+Der eigentliche Ray-Tracing Algorithmus verbirgt sich hinter der Funktion `trace_ray`, welche ein Objekt der Klasse `Light` zurückgibt. Dieser Funktion wird ein zu tracender Ray mitgegeben, sowie die Angabe, ob es sich um einen primary Ray handelt. Die Funktion gibt ein Objekt der Klasse `Light` zurück, welche die Lichtinformation am Ausgangspunkt des Rays darstellt (d.h. $t = 0$).
 
 Um den Strahl zu tracen sucht der Algorithmus zuerst aus der Liste der Objekte das Objekt heraus, auf das der Lichtstrahl zuerst trifft. Trifft der Lichtstrahl auf kein Objekt wird wieder die Farbe Schwarz zurückgegeben. Trifft der Lichtstrahl auf ein Objekt wird zuerst überprüft, ob es sich bei dem Objekt um eine Lichtquelle handelt. 
 
@@ -320,3 +321,15 @@ Somit wird der in der Theorie beschriebene Ray-Tracing Algorithmus implementiert
 ### 3.5 Utils
 
 Außerdem wurden noch zahlreiche zusätzliche Hilfsfunktionen implementiert, welche z.B. den Umgang mit Koordinaten vereinfachen.
+
+### 3.6 Main-Funktion
+
+In dem Skript `main.py` wird die Szene mit allen Objekten und der Kamera erstellt, außerdem wird das Bild erzeugt und abgespeichert. 
+
+In der ausgewählten Konfiguration dauert das Rendern eines Bildes mit der Auflösng $1920 \times 1080$ ungefähr 9 Minuten.
+
+Das Ergebnis sieht wie folgt aus:
+
+![](imgs/medium.png)
+
+*Abb. 9: Gerendertes 1080p Bild*
