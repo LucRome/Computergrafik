@@ -47,9 +47,7 @@ class Scenery:
         return data
 
     
-    def trace_ray(self, ray: Ray, depth: int = 0) -> Light:
-        if depth > self.max_depth:
-            return Light(rgb=BLACK, intensity=0)
+    def trace_ray(self, ray: Ray, primary_ray: bool = True) -> Light:
 
         # determine closest intersect point (and object)
         [closest_param, closest_obj] = [inf , None]
@@ -71,12 +69,14 @@ class Scenery:
         if closest_obj.source_object is not None:
             # let the light from the source travel the distance and return it
             return closest_obj.source_object.get_light_intensity(ray.offset)
-        else:
+        elif primary_ray:
             # continue tracing ray recursively and interpolate the returned light information with the one 
             # of the closest object, then let the light travel the distance to the start point
             dir = (self.source.offset - intersect_point)
                 # TODO: catch that ray might be behind object when object is between viewer and source
-            light_intensity = self.trace_ray(Ray(intersect_point, dir), depth + 1)
+            light_intensity = self.trace_ray(Ray(intersect_point, dir), False)
             return get_diffuse_surface_color(closest_obj.albedo, light_intensity, normalise(closest_obj.get_normal(intersect_point)), normalise(dir)).travel(distance)
+        else:
+            return Light(BLACK, 0)
 
 
