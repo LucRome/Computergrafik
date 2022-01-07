@@ -14,6 +14,8 @@ IMG_PATH = Path(__file__).resolve().parent.joinpath('imgs')
 if not IMG_PATH.exists():
     IMG_PATH.mkdir()
 
+
+# Create Objects
 OBJECTS = [
     # Planes on the sides
     Plane(vec1=[1,0,0], vec2=[0,0,-1], offset=[0,20,0], albedo=WHITE),
@@ -31,18 +33,7 @@ OBJECTS = [
 ]
 
 FOV = 20
-
-"""
-Small Image
-"""
-camera = SimpleCamera(480,360,FOV)
+camera = SimpleCamera(1920,1080,FOV)
 scenery = Scenery(OBJECTS, camera)
 
-test_single_pixel(scenery, pixel_x=227, pixel_y=73)
-save_as_img_timed(IMG_PATH.joinpath('small.png'), scenery)
-
-"""
-Medium Image
-"""
-camera.set_resolution(1920, 1080)
 save_as_img_timed(IMG_PATH.joinpath('medium.png'), scenery)

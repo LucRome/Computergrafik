@@ -8,12 +8,18 @@ Utility Functions
 """
 
 def save_as_img(path: str, scenery: Scenery) -> None:
-
+    """
+    Renders the Scenery and saves it as an image file (e.g. png)
+    """
     data = scenery.render_img_to_rgb_array()
     img = Image.fromarray(data, mode='RGB')
     img.save(path)
 
 def save_as_img_timed(path: str, scenery: Scenery) -> None:
+    """
+    Renders the Scenery and saves it as an image file (e.g. png)
+    Also tracks how long the process of rendering took
+    """
     time_start = time_ns()
     data = scenery.render_img_to_rgb_array()
     dt = time_ns() - time_start
